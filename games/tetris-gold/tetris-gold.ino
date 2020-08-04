@@ -156,10 +156,11 @@ const int music[][2] PROGMEM = {
   {    0,  40 }, { 1004, 380 }, {  948, 384 }, {  845, 828 }, {  752,  828 },
   {  948, 828 }, { 1127, 748 }, {    0,  14 }, {    0,  26 }, { 1127, 1696 }};
 
-// Input
-bool IsRight()  { return (analogRead(A0) > 750) && (analogRead(A0) < 950); }
-bool IsLeft()   { return (analogRead(A0) > 500) && (analogRead(A0) < 750); }
-bool IsDrop()   { return (analogRead(A3) > 500) && (analogRead(A3) < 750); }
+// Input for vertical screen orientation
+bool IsRight()  { return (analogRead(A3) > 750) && (analogRead(A3) < 950); }
+bool IsLeft()   { return (analogRead(A3) > 500) && (analogRead(A3) < 750); }
+bool IsDown()   { return (analogRead(A0) > 750) && (analogRead(A0) < 950); }
+bool IsUp()     { return (analogRead(A0) > 500) && (analogRead(A0) < 750); }
 bool IsRotate() { return digitalRead(1) == LOW; }
 
 // Function prototypes - generic ones I use in all games
@@ -468,8 +469,8 @@ void loop() {
 
   drawScreenBorder();
   ssd1306_char_f8x8(1, 64,"TETRIS");
-  ssd1306_char_f8x8(1, 48, "Attiny");
-  ssd1306_char_f8x8(1, 40, "Arcade");
+//  ssd1306_char_f8x8(1, 48, "Attiny");
+//  ssd1306_char_f8x8(1, 40, "Arcade");
   drawScreenBorder();
 
   for (byte lxn = 0; lxn < 8; lxn++) {
@@ -484,7 +485,7 @@ void loop() {
   long startT = millis();
   long nowT =0;
   boolean sChange = 0;
-  while(IsDrop()) {
+  while(IsDown()) {
     nowT = millis();
     if (nowT - startT > 2000) {
       sChange = 1;
@@ -512,7 +513,7 @@ void loop() {
     }
     if (sChange == 1) break;
   }  
-  while(IsDrop());
+  while(IsDown());
   
   if (sChange == 0) {
     ssd1306_char_f8x8(2, 21, "GOLD"); 
@@ -726,7 +727,7 @@ void handleInput(void) {
   {
     keyLock = 1;
   }
-  else if (IsDrop())
+  else if (IsDown())
   {
     keyLock = 4;
   }
@@ -736,7 +737,7 @@ void handleInput(void) {
   }
 
   if (keyLock == 4) {
-    while (IsDrop()) {
+    while (IsDown()) {
       drawPiece(ERASE);
       movePieceDown();
       drawPiece(DRAW);
