@@ -8,10 +8,5 @@ namespace th
 		{
 			//
 		}
-
-		void drawBitmap()
-		{
-			//
-		}
 	}
 }
