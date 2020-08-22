@@ -70,23 +70,186 @@ const uint8_t picture [] PROGMEM =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
-void RenderLayer_0_Callback(uint8_t page, uint8_t column, bool isOddFrame, uint8_t &mask, uint8_t &bits)
+const uint8_t tile_empty[] PROGMEM =
 {
+	// bits A
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	// mask
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	// bits B
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+	0b00000000,
+};
+
+const uint8_t tile_4x8[] PROGMEM =
+{
+  // bits A
+  0b11111111,
+  0b10000001,
+  0b10000001,
+  0b11111111,
+  // mask
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  // bits B
+  0b11111111,
+  0b10011001,
+  0b10011001,
+  0b11111111,
+};
+
+const uint8_t tile_triangle[] PROGMEM =
+{
+	// bits A
+	0b00000000,
+	0b01000000,
+	0b01100000,
+	0b01010000,
+	0b01001000,
+	0b01000100,
+	0b01111110,
+	0b00000000,
+	// mask
+	0b10000000,
+	0b11000000,
+	0b11100000,
+	0b11110000,
+	0b11111000,
+	0b11111100,
+	0b11111110,
+	0b11111111,
+	// bits B
+	0b00000000,
+	0b01000000,
+	0b01100000,
+	0b01110000,
+	0b01111000,
+	0b01111100,
+	0b01111110,
+	0b00000000,
+};
+
+const uint8_t tile_square[] PROGMEM =
+{
+  // bits A
+  0b00000000,
+  0b01111110,
+  0b01000010,
+  0b01000010,
+  0b01000010,
+  0b01000010,
+  0b01111110,
+  0b00000000,
+  // mask
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  // bits B
+  0b00000000,
+  0b01111110,
+  0b01000010,
+  0b01011010,
+  0b01011010,
+  0b01000010,
+  0b01111110,
+  0b00000000,
+};
+
+const uint8_t tile_box_quater[] PROGMEM =
+{
+  // bits A
+  0b00000000,
+  0b01111111,
+  0b01000000,
+  0b01010101,
+  0b01001011,
+  0b01010101,
+  0b01001011,
+  0b01011111,
+  // mask
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  0b11111111,
+  // bits B
+  0b00000000,
+  0b01111111,
+  0b01000000,
+  0b01001011,
+  0b01010101,
+  0b01001011,
+  0b01010101,
+  0b01011111,
+};
+
+int8_t s = 2;
+int8_t w = 8;
+int8_t y = 0, dy = 1;
+int8_t x = 0, dx = 1;
+
+void RenderBackground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask, bool isOddFrame)
+{
+#if 0
 	uint16_t index = page * 128 + column;
 	bits = pgm_read_byte(&picture[index]);
-	bits ^= 0xFF;
+#else
+	bool isSolid = (page & 0x01) ^ (column >> 3 & 0x01);
+	bits = isSolid ? ((column & 0x07) == 0 || (column & 0x07) == 7 ? 0xFF : ((column & 0x01 ^ isOddFrame ? 0xAB : 0xD5))) : 0x00;
+#endif
 }
 
-void RenderLayer_1_Callback(uint8_t page, uint8_t column, bool isOddFrame, uint8_t &mask, uint8_t &bits)
+void RenderForeground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask, bool isOddFrame)
 {
-	mask = 0b11111000;
-	bits = 0b00000010;
+	for (uint8_t yy = 0; yy < s; ++yy)
+	{
+		for (uint8_t xx = 0; xx < s; ++xx)
+		{
+			uint8_t flipY = (yy & 0x01) ? 0x00 : 0x80;
+			uint8_t flipX = (xx & 0x01) ? 0x40 : 0x00;
+#if 0
+			th::render::getTileRenderData(tile_box_quater, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits);
+#else
+			th::render::getTileRenderData(tile_box_quater, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits, mask, isOddFrame);
+#endif
+		}
+	}
 }
 
 const th::render::RenderLayerCallback renderSequence[] =
 {
-	&RenderLayer_0_Callback,
-	&RenderLayer_1_Callback,
+	&RenderBackground,
+	&RenderForeground,
 	NULL
 };
 
@@ -98,5 +261,26 @@ void setup()
 
 void loop()
 {
+	y += dy * 1;
+	x += dx * 2;
+
+	if (y < 0)
+		y = 0;
+	if (y > 64 - 8)
+		y = 64 - 8;
+	if (x < 0)
+		x = 0;
+	if (x > 128 - 8)
+		x = 128 - 8;
+
+	if (y == 0 || y == 64 - s * 8)
+	{
+		dy = -dy;
+	}
+	if (x == 0 || x == 128 - s * 8)
+	{
+		dx = -dx;
+	}
+
 	th::render::update();
 }
