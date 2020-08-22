@@ -510,7 +510,7 @@ void loop() {
     ssd1306_fillscreen(0x00);
     playTetris();
   }
-  delay(1000);
+  delay(3000);
   system_sleep();
 }
 
@@ -1006,8 +1006,11 @@ void playTetris(void) {
   }
   drawScreenBorder();
 
+  ssd1306_char_f8x8(1, 88,"YOU...");
+  ssd1306_char_f8x8(1, 48, "...TOP");
   displayScore(score, 1,80,0);
   displayScore(topScore, 1,40,0);
+  
    for (int i = 0; i<1000; i = i+ 50){
     beep(50,i);
     }
