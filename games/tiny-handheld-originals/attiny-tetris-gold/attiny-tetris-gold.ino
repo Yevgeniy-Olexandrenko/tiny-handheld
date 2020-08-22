@@ -438,11 +438,12 @@ void setup() {
   cbi(DDRB, A0);        // input
   cbi(DDRB, A3);        // input
   sbi(PCMSK, PCINT1);   // pin change mask: listen to PB1
+  sbi(PCMSK, PCINT3);   // pin change mask: listen to PB3
   GIMSK |= 0b00100000;  // enable PCINT interrupt
 
-  randomSeedEEPROM();   // initializing the pseudorandom number generator
   sei();                // enable all interrupts
   ssd1306_init();       // initialise the screen
+  randomSeedEEPROM();   // initializing the pseudorandom number generator
 }
 
 void loop() {
