@@ -414,9 +414,11 @@ void system_sleep() {
 }
 
 void randomSeedEEPROM() {
-  uint16_t seed = eeprom_read_word( (uint16_t *) 0x03);
-  randomSeed(seed++);
-  eeprom_write_word( (uint16_t *) 0x03, seed & 0xFF);
+  uint8_t seed_a = eeprom_read_byte( (uint8_t *) 0x00);
+  uint8_t seed_b = eeprom_read_byte( (uint8_t *) (0x80 | seed_a));
+  eeprom_write_byte( (uint8_t *) (0x80 | seed_a), ++seed_b);
+  randomSeed(int(seed_b << 8) + int(seed_a));
+  random();
 }
 
 void soundPlay(int note, int duration) {
