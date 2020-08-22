@@ -24,7 +24,6 @@
 #include "font8x8AJ.h"
 
 // Standard Arduino headers
-#include <EEPROM.h> 
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
 
@@ -999,14 +998,10 @@ void playTetris(void) {
   ssd1306_fillscreen(0x00);
 
   bool newHigh = false;
-  topScore = EEPROM.read(0);
-  topScore = topScore << 8;
-  topScore = topScore |  EEPROM.read(1);
-  
+  topScore  = eeprom_read_word( (uint16_t *) 0x00);
   if (score > topScore) { 
     topScore = score;
-    EEPROM.write(1,score & 0xFF); 
-    EEPROM.write(0,(score>>8) & 0xFF);
+    eeprom_write_word( (uint16_t *) 0x00, topScore);
     newHigh = true; 
   }
   drawScreenBorder();
