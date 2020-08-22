@@ -986,7 +986,7 @@ void playTetris(void) {
     drawPiece(ERASE);
     movePieceDown();
     drawPiece(DRAW);
-    beep(20, 568);
+    // beep(20, 568);
     drawGameScreen(currentPiece.column, currentPiece.column + 4, currentPiece.row, currentPiece.row+5, PARTIAL);         
     moveTime = millis();
     if (level * LEVELFACTOR > DROPDELAY) level = DROPDELAY / LEVELFACTOR;
