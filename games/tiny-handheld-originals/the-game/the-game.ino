@@ -70,12 +70,33 @@ const uint8_t picture [] PROGMEM =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
+void RenderLayer_0_Callback(uint8_t page, uint8_t column, bool isOddFrame, uint8_t &mask, uint8_t &bits)
+{
+	uint16_t index = page * 128 + column;
+	bits = pgm_read_byte(&picture[index]);
+	bits ^= 0xFF;
+}
+
+void RenderLayer_1_Callback(uint8_t page, uint8_t column, bool isOddFrame, uint8_t &mask, uint8_t &bits)
+{
+	mask = 0b11111000;
+	bits = 0b00000010;
+}
+
+const th::render::RenderLayerCallback renderSequence[] =
+{
+	&RenderLayer_0_Callback,
+	&RenderLayer_1_Callback,
+	NULL
+};
+
 void setup()
 {
 	th::engine::init();
+	th::render::setRenderSequence(renderSequence);
 }
 
 void loop()
 {
-	th::display::drawBitmap(0, 0, 7, 127, picture);
+	th::render::update();
 }

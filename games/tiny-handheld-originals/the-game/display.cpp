@@ -32,7 +32,7 @@ namespace th
 			0x2E,             // Deactivate Scroll command
 			0xAF,             // Set Display ON/OFF - AE=OFF, AF=ON
 			0x22, 0x00, 0x3f, // Set Page Address (start,end)
-			0x21, 0x00,	0x7f, // Set Column Address (start,end)
+			0x21, 0x00, 0x7f, // Set Column Address (start,end)
 		};
 
 		void i2csw_start() 
@@ -82,6 +82,9 @@ namespace th
 				write(pgm_read_byte(&initSequence[i]));
 			}
 			stop();
+
+			// Clear on power-on
+			clear();
 		}
 
 		void startCommand()
