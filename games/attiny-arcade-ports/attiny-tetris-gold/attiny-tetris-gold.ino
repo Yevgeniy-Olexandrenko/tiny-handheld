@@ -94,24 +94,21 @@ static const int blocks[7] PROGMEM = {
   0x4444, 0x44C0, 
   0x4460, 0x0660, 
   0x06C0, 0x0E40, 
-  0x0C60
-};
+  0x0C60};
 
 // The bitmaps for blocks on the screen
 static const byte  blockout[16] PROGMEM = {
   0xF8, 0x00, 0x3E, 0x80, 
   0x0F, 0xE0, 0x03, 0xF8, 
   0x3E, 0x80, 0x0F, 0xE0, 
-  0x03, 0xF8, 0x3E, 0x00
-};
+  0x03, 0xF8, 0x3E, 0x00};
 
 // The bitmaps for ghost blocks on the screen
 static const byte  ghostout[16] PROGMEM = {
   0x88, 0x00, 0x22, 0x80, 
   0x08, 0x20, 0x02, 0x88, 
   0x22, 0x80, 0x08, 0x20, 
-  0x02, 0x88, 0x22, 0x00
-};
+  0x02, 0x88, 0x22, 0x00};
 
 // Decode lookup to translate block positions to the 8 columns on the screen
 static const byte startDecode[11] PROGMEM = {0,1,1,2,3,4,4,5,6,7,8};
@@ -197,7 +194,7 @@ byte readGhostArray(byte x, byte y);
 void writeGhostArray(byte x, byte y, bool value);
 void fillGrid(byte value, bool mode);
 
-void rotatePiece(bool);
+void rotatePiece(void);
 bool movePieceDown(void);
 void movePieceLeft(void);
 void movePieceRight(void);
@@ -500,7 +497,7 @@ void loop() {
   if (sChange == 0) {
     ssd1306_char_f8x8(2, 21, "GOLD"); 
     // playing the Tetris Theme
-    uint8_t sng = 50; // (ghost == 1) ? 50 : 25;
+    uint8_t sng = (ghost == 1) ? 50 : 25;
     for (uint8_t i = 0; i < sng; i++) {
       // reduce note duration by 2 to speed up music
       int note = pgm_read_word_near(&(music[i][0]));
@@ -574,28 +571,24 @@ void fillGrid(byte value, bool mode) {
   }
 }
 
-void rotatePiece(bool ccw) {
+void rotatePiece(void) {
   byte blocks[4][4];
 
   memcpy(oldPiece.blocks, currentPiece.blocks, 16);
   oldPiece.row = currentPiece.row;
   oldPiece.column = currentPiece.column;
 
-  for (byte y = 0; y < 4; ++y) {
-    for (byte x = 0; x < 4; ++x) {
-      blocks[y][x] = ccw
-      ? currentPiece.blocks[x][4 - y - 1]
-      : currentPiece.blocks[4 - x - 1][y];
+  for (byte i = 0; i < 4; ++i) {
+    for (byte j = 0; j < 4; ++j) {
+      blocks[j][i] = currentPiece.blocks[4 - i - 1][j];
     }
   }
   oldPiece = currentPiece;
   memcpy(currentPiece.blocks, blocks, 16);
-  if (checkCollision()) {
-    currentPiece = oldPiece;
-  } else {
+  if (checkCollision()) currentPiece = oldPiece; else {
     drawGhost(ERASE);
     if (createGhost()) drawGhost(DRAW);
-  }
+    }
 }
 
 bool movePieceDown(void) {
@@ -711,11 +704,10 @@ void handleInput(void) {
   {
     if (IsLeft())        keyLock = 1;
     else if (IsRight())  keyLock = 2;
-    else if (IsDown())   keyLock = 3;
-    else if (IsAction()) keyLock = 4;
-    else if (IsCenter()) keyLock = 5;
+    else if (IsDown())   keyLock = 4;
+    else if (IsAction()) keyLock = 3;
 
-    if(keyLock != 0) beep(20, 568);
+    if(keyLock != 0) beep(20, 284);
     switch(keyLock)
     {
       case 1:
@@ -731,6 +723,12 @@ void handleInput(void) {
         drawGameScreen(currentPiece.column-1, currentPiece.column + 4, currentPiece.row, currentPiece.row+4,PARTIAL);
         break;
       case 3:
+        drawPiece(ERASE);
+        rotatePiece();
+        drawPiece(DRAW);
+        drawGameScreen(currentPiece.column, currentPiece.column + 4, currentPiece.row, currentPiece.row+4,PARTIAL);
+        break;
+      case 4:
         while (IsDown()) {
           drawPiece(ERASE);
           movePieceDown();
@@ -740,16 +738,9 @@ void handleInput(void) {
           if (stopAnimate) return;
         }
         break;
-      case 4:
-      case 5:
-        drawPiece(ERASE);
-        rotatePiece(keyLock == 5);
-        drawPiece(DRAW);
-        drawGameScreen(currentPiece.column, currentPiece.column + 4, currentPiece.row, currentPiece.row+4,PARTIAL);
-        break;
     }
   }
-  else if (!(IsLeft() || IsRight() || IsDown() || IsAction() || IsCenter()))
+  else if (!IsLeft() && !IsRight() && !IsDown() && !IsAction())
   {
     keyLock = 0;
   }  
@@ -986,7 +977,7 @@ void playTetris(void) {
     drawPiece(ERASE);
     movePieceDown();
     drawPiece(DRAW);
-    // beep(20, 568);
+    beep(20, 568);
     drawGameScreen(currentPiece.column, currentPiece.column + 4, currentPiece.row, currentPiece.row+5, PARTIAL);         
     moveTime = millis();
     if (level * LEVELFACTOR > DROPDELAY) level = DROPDELAY / LEVELFACTOR;
