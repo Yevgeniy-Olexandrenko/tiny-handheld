@@ -231,16 +231,18 @@ void RenderBackground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask
 
 void RenderForeground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask, bool isOddFrame)
 {
+	th::render::setTileBank(th::render::TS_PROGMEM, tile_box_quater);
+
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
 		{
-			uint8_t flipY = (yy & 0x01) ? 0x00 : 0x80;
-			uint8_t flipX = (xx & 0x01) ? 0x40 : 0x00;
-#if 0
-			th::render::getTileRenderData(tile_box_quater, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits);
+			th::render::TileFlags flipY = (yy & 0x01) ? th::render::TF_EMPTY : th::render::TF_FLIP_Y;
+			th::render::TileFlags flipX = (xx & 0x01) ? th::render::TF_FLIP_X : th::render::TF_EMPTY;
+#if 1
+			th::render::renderTile(0, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits);
 #else
-			th::render::getTileRenderData(tile_box_quater, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits, mask, isOddFrame);
+			th::render::renderTile(0, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits, mask, isOddFrame);
 #endif
 		}
 	}
