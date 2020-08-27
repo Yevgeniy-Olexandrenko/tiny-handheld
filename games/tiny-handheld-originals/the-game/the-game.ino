@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine.h"
+#include "font6x8.h"
 
 const uint8_t picture [] PROGMEM =
  {
@@ -155,22 +156,22 @@ const uint8_t tile_square[] PROGMEM =
 {
   // bits A
   0b00000000,
-  0b01111110,
-  0b01000010,
-  0b01000010,
-  0b01000010,
-  0b01000010,
-  0b01111110,
-  0b00000000,
+  0b01111111,
+  0b01111111,
+  0b01100000,
+  0b01100000,
+  0b01100000,
+  0b01100000,
+  0b01100000,
   // mask
   0b11111111,
   0b11111111,
   0b11111111,
   0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
+  0b11110000,
+  0b11110000,
+  0b11110000,
+  0b11110000,
   // bits B
   0b00000000,
   0b01111110,
@@ -213,39 +214,57 @@ const uint8_t tile_box_quater[] PROGMEM =
   0b01011111,
 };
 
+const th::render::FontData font6x8 PROGMEM =
+{
+	th::render::TS_PROGMEM, tileBank_font6x8, 6, ' '
+};
+
 int8_t s = 2;
 int8_t w = 8;
 int8_t y = 0, dy = 1;
 int8_t x = 0, dx = 1;
 
-void RenderBackground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask, bool isOddFrame)
+void RenderBackground(th::render::RenderContext &renderContext)
 {
 #if 0
-	uint16_t index = page * 128 + column;
-	bits = pgm_read_byte(&picture[index]);
+	uint16_t index = renderContext.page * 128 + renderContext.column;
+	renderContext.bits = pgm_read_byte(&picture[index]);
 #else
-	bool isSolid = (page & 0x01) ^ (column >> 3 & 0x01);
-	bits = isSolid ? ((column & 0x07) == 0 || (column & 0x07) == 7 ? 0xFF : ((column & 0x01 ^ isOddFrame ? 0xAB : 0xD5))) : 0x00;
+	bool isSolid = (renderContext.page & 0x01) ^ (renderContext.column >> 3 & 0x01);
+	uint8_t& col = renderContext.column;
+	renderContext.bits = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ renderContext.isOddFrame ? 0xAB : 0xD5))) : 0x00;
 #endif
 }
 
-void RenderForeground(uint8_t page, uint8_t column, uint8_t &bits, uint8_t &mask, bool isOddFrame)
+void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 {
-	th::render::setTileBank(th::render::TS_PROGMEM, tile_box_quater);
-
+	th::render::setTileBank(th::render::TS_PROGMEM, tile_square);
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
 		{
 			th::render::TileFlags flipY = (yy & 0x01) ? th::render::TF_EMPTY : th::render::TF_FLIP_Y;
 			th::render::TileFlags flipX = (xx & 0x01) ? th::render::TF_FLIP_X : th::render::TF_EMPTY;
-#if 1
-			th::render::renderTile(0, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits);
-#else
-			th::render::renderTile(0, w | flipY | flipX, x + xx * w, y + yy * w, page, column, bits, mask, isOddFrame);
-#endif
+			th::render::renderTile(0, tileF | flipX | flipY | w, x + xx * w, y + yy * w);
 		}
 	}
+}
+
+void RenderForeground(th::render::RenderContext &renderContext)
+{
+	th::render::TileFlags tileF;
+	tileF |= th::render::TF_HAS_MASK;
+	//	tileF |= th::render::TF_HAS_ODD_BM;
+	//	tileF |= th::render::TF_TRANSPARENT;
+	//	tileF |= th::render::TF_INVERSE;
+
+	RenderSprite(x, y, tileF);
+	th::render::flushRenderContext();
+
+	th::render::renderText(font6x8, 6, 128 - x, y + 4, "Testing!", 8);
+	th::render::flushRenderContext();
+
+	RenderSprite(x + 4, 64 - y, tileF);
 }
 
 const th::render::RenderLayerCallback renderSequence[] =
@@ -285,4 +304,5 @@ void loop()
 	}
 
 	th::render::update();
+	//delay(100);
 }
