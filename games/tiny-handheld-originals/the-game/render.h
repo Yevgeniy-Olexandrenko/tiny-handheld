@@ -56,7 +56,7 @@ namespace th
 		void flushRenderContext();
 
 		void setTileBank(TileStorage tileStorage, TileBankAddr tileBankAddr);
-		TileDataAddr getTileDataAddr(TileFlags& tileF, TileIndex tileI);
+		TileDataAddr getTileDataAddr(TileFlags tileF, TileIndex tileI);
 
 		void renderTile(TileDataAddr tileDataAddr, TileFlags tileF, uint8_t tileX, uint8_t tileY);
 		void renderText(const FontData& fontData, TileFlags tileF, uint8_t x, uint8_t y, const char* text, uint8_t length);

@@ -267,7 +267,7 @@ void RenderForeground(th::render::RenderContext &renderContext)
 	RenderSprite(x + 4, 64 - y, tileF);
 }
 
-const th::render::RenderLayerCallback renderSequence[] =
+const th::render::RenderLayerCallback renderSequence[] PROGMEM =
 {
 	&RenderBackground,
 	&RenderForeground,

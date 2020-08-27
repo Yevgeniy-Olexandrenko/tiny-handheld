@@ -67,11 +67,12 @@ namespace th
 					for (m_renderContext.column = 0; m_renderContext.column < 128; ++m_renderContext.column)
 					{
 						m_renderContext.composed = 0x00;
-						for (uint8_t index = 0; m_renderSequence[index]; ++index)
+						RenderSequence renderSequence = m_renderSequence;
+						while (RenderLayerCallback renderLayerCallback = pgm_read_word_near(renderSequence++))
 						{
 							m_renderContext.mask = 0xFF;
 							m_renderContext.bits = 0x00;
-							m_renderSequence[index](m_renderContext);
+							renderLayerCallback(m_renderContext);
 							m_renderContext.composed &= m_renderContext.mask;
 							m_renderContext.composed |= m_renderContext.bits;
 						}
@@ -114,7 +115,7 @@ namespace th
 			m_tileBankAddr = tileBankAddr;
 		}
 
-		TileDataAddr getTileDataAddr(TileFlags& tileF, TileIndex tileI)
+		TileDataAddr getTileDataAddr(TileFlags tileF, TileIndex tileI)
 		{
 			uint8_t tileW = tileF & TF_WIDTH_BITS;
 			uint8_t tileS = tileW;
@@ -125,7 +126,7 @@ namespace th
 			return tileI * tileS;
 		}
 
-		void fetchTileData(TileDataAddr& tileDataAddr, TileFlags& tileF, uint8_t& tileB, uint8_t& tileM)
+		void fetchTileData(TileDataAddr tileDataAddr, TileFlags tileF, uint8_t& tileB, uint8_t& tileM)
 		{
 			tileB = m_tileDataReader(tileDataAddr);
 
