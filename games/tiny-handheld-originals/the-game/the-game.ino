@@ -224,6 +224,10 @@ int8_t w = 8;
 int8_t y = 0, dy = 1;
 int8_t x = 0, dx = 1;
 
+uint32_t saved_time;
+uint8_t frame_count;
+uint8_t fps;
+
 void RenderBackground(th::render::RenderContext &renderContext)
 {
 #if 0
@@ -261,48 +265,55 @@ void RenderForeground(th::render::RenderContext &renderContext)
 	RenderSprite(x, y, tileF);
 	th::render::flushRenderContext();
 
-	th::render::renderText(font6x8, 6, 128 - x, y + 4, "Testing!", 8);
+	th::render::renderText(font6x8, 6, 128 - x, y + 4, "Some text!", 10);
 	th::render::flushRenderContext();
 
 	RenderSprite(x + 4, 64 - y, tileF);
 }
 
-const th::render::RenderLayerCallback renderSequence[] PROGMEM =
+void RenderFPS(th::render::RenderContext &renderContext)
 {
-	&RenderBackground,
-	&RenderForeground,
-	NULL
-};
+	char buffer[3] = {0};
+	buffer[0] = '0' + (fps / 10);
+	buffer[1] = '0' + (fps % 10);
+
+	th::render::renderText(font6x8, 6, 0, 0, buffer, 2);
+	th::render::flushRenderContext();
+}
+
+const th::render::RenderLayerCallback renderSequence[] PROGMEM =
+	{
+		&RenderBackground,
+		&RenderForeground,
+		&RenderFPS,
+		NULL};
 
 void setup()
 {
+	saved_time = millis();
+	frame_count = 0;
+	fps = 0;
+
 	th::engine::init();
 	th::render::setRenderSequence(renderSequence);
 }
 
 void loop()
 {
+	uint32_t current_time = millis();
+	if (current_time >= saved_time + 1000)
+	{
+		fps = frame_count;
+		saved_time += 1000;
+		frame_count = 0;
+	}
+	frame_count++;
+
 	y += dy * 1;
-	x += dx * 2;
+	x += dx * 1;
 
-	if (y < 0)
-		y = 0;
-	if (y > 64 - 8)
-		y = 64 - 8;
-	if (x < 0)
-		x = 0;
-	if (x > 128 - 8)
-		x = 128 - 8;
-
-	if (y == 0 || y == 64 - s * 8)
-	{
-		dy = -dy;
-	}
-	if (x == 0 || x == 128 - s * 8)
-	{
-		dx = -dx;
-	}
+	if (y == 0 || y == 63) dy = -dy;
+	if (x == 0 || x == 127) dx = -dx;
 
 	th::render::update();
-	//delay(100);
 }

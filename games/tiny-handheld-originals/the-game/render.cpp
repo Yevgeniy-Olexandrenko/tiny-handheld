@@ -61,9 +61,12 @@ namespace th
 				for (m_renderContext.page = 0; m_renderContext.page < 8; ++m_renderContext.page)
 				{
 					m_renderContext.pageY = m_renderContext.page << 3;
-					display::setPos(m_renderContext.page, 0);
-					display::startData();
+					display::startCommand();
+					display::write(0xb0 + m_renderContext.page);
+					display::write(0x00);
+					display::write(0x10);
 
+					display::startData();
 					for (m_renderContext.column = 0; m_renderContext.column < 128; ++m_renderContext.column)
 					{
 						m_renderContext.composed = 0x00;
@@ -194,14 +197,10 @@ namespace th
 				if (y >> 3 == m_renderContext.page || m_renderContext.pageY >= y && m_renderContext.pageY < y + 8)
 				{
 					setTileBank(fontData.tileStorage, fontData.tileBankAddr);
-
 					tileF &= TF_CONTROL_BITS;
 					tileF |= fontData.tileFlags & (TF_CONFIG_BITS | TF_WIDTH_BITS);
-
-					for (uint8_t i = 0; i < length && text[i]; ++i, x += dispW)
-					{
-						renderTile(getTileDataAddr(tileF, text[i] - fontData.asciiOffset), tileF, x, y);
-					}
+					uint8_t i = (m_renderContext.column - x) / dispW, tx = i * dispW + x;
+					renderTile(getTileDataAddr(tileF, text[i] - fontData.asciiOffset), tileF, tx, y);
 				}
 			}
 		}
