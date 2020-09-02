@@ -4,9 +4,6 @@
 #define SSD1306_COMMAND 0x00
 #define SSD1306_DATA    0x40
 
-#define I2CSW_H(PORT) PORTB |=  (1 << PORT)
-#define I2CSW_L(PORT) PORTB &= ~(1 << PORT)
-
 namespace th
 {
 	namespace display
@@ -34,145 +31,12 @@ namespace th
 //			0x22, 0x00, 0x3f, // Set Page Address (start,end)
 //			0x21, 0x00, 0x7f, // Set Column Address (start,end)
 //		};
-//
-//		void i2csw_start() 
-//		{
-//			DDRB |= (1 << SSD1306_SDA);  // Set port as output
-//			DDRB |= (1 << SSD1306_SCL);  // Set port as output
-//			I2CSW_H(SSD1306_SCL);        // Set to HIGH
-//			I2CSW_H(SSD1306_SDA);        // Set to HIGH
-//			I2CSW_L(SSD1306_SDA);        // Set to LOW
-//			I2CSW_L(SSD1306_SCL);        // Set to LOW
-//		}
-//
-//		void i2csw_stop() 
-//		{
-//			I2CSW_L(SSD1306_SCL);        // Set to LOW
-//			I2CSW_L(SSD1306_SDA);        // Set to LOW
-//			I2CSW_H(SSD1306_SCL);        // Set to HIGH
-//			I2CSW_H(SSD1306_SDA);        // Set to HIGH
-//			DDRB &= ~(1 << SSD1306_SDA); // Set port as input
-//		}
-//
-//		void i2csw_byte(uint8_t b) 
-//		{
-//			for (uint8_t i = 0; i < 8; i++) 
-//			{
-//				if ((b << i) & 0x80) 
-//					I2CSW_H(SSD1306_SDA); 
-//				else 
-//					I2CSW_L(SSD1306_SDA);
-//				I2CSW_H(SSD1306_SCL);
-//				I2CSW_L(SSD1306_SCL);
-//			}
-//			I2CSW_H(SSD1306_SDA);
-//			I2CSW_H(SSD1306_SCL);
-//			I2CSW_L(SSD1306_SCL);
-//		}
-//
-//		void init()
-//		{
-//			// Wait to initialize itself after power-on
-//			_delay_ms(40);
-//
-//			// Send initialization sequence
-//			startCommand();
-//			for (uint8_t i = 0; i < sizeof (initSequence); i++) 
-//			{
-//				write(pgm_read_byte(&initSequence[i]));
-//			}
-//			stop();
-//
-//			// Clear on power-on
-//			clear();
-//		}
-//
-//		void startCommand()
-//		{
-//			i2csw_start();
-//			i2csw_byte(SSD1306_SA);
-//			i2csw_byte(SSD1306_COMMAND);
-//		}
-//
-//		void startData()
-//		{
-//			i2csw_start();
-//			i2csw_byte(SSD1306_SA);
-//			i2csw_byte(SSD1306_DATA);
-//		}
-//
-//		void write(uint8_t byte)
-//		{
-//			i2csw_byte(byte);
-//		}
-//
-//		void stop()
-//		{
-//			i2csw_stop();
-//		}
-//
-//		void setPos(uint8_t page, uint8_t column)
-//		{
-//			startCommand();
-//			write(0xb0 | (page & 0x07)); // Set page start address
-//			write(column & 0x0f);        // Set the lower nibble of the column start address
-//			write(0x10 | (column >> 4)); // Set the higher nibble of the column start address
-//			stop();
-//		}
-//
-//		void clear()
-//		{
-//			fill(0x00);
-//		}
-//
-//		void fill(uint8_t p)
-//		{
-//			fill(p, p, p, p);
-//		}
-//
-//		void fill(uint8_t p1, uint8_t p2)
-//		{
-//			fill(p1, p2, p1, p2);
-//		}
-//
-//		void fill(uint8_t p1, uint8_t p2, uint8_t p3, uint8_t p4)
-//		{
-//			setPos(0, 0);
-//			startData();
-//			for (uint16_t i = 0; i < 128 * 8 / 4; i++) 
-//			{
-//				write(p1);
-//				write(p2);
-//				write(p3);
-//				write(p4);
-//			}
-//			stop();
-//		}
-//
-//		void drawBitmap(uint8_t page0, uint8_t column0, uint8_t page1, uint8_t column1, const uint8_t bitmap[])
-//		{
-//			for (uint8_t p = page0; p <= page1; ++p)
-//			{
-//				setPos(p, column0);
-//				startData();
-//				for (uint8_t c = column0; c <= column1; ++c)
-//				{
-//					write(pgm_read_byte(bitmap++));
-//				}
-//				stop();
-//			}
-//		}
 
 		////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////
-
-		#define I2CPORT PORTB
-		#define I2CDDR  DDRB
-		#define BB_SDA  0
-		#define BB_SCL  2
    
-		void i2cWrite(uint8_t b)
+		static void i2cWrite(uint8_t b)
 		{
 			uint8_t i;
 			uint8_t bOld = I2CPORT & ~(1 << BB_SDA | 1 << BB_SCL);
@@ -192,7 +56,7 @@ namespace th
 			I2CPORT = bOld;
 		}
 
-		void i2cWrite(uint8_t *pData, uint8_t bLen)
+		static void i2cWrite(uint8_t *pData, uint8_t bLen)
 		{
 			uint8_t i, b;
 			uint8_t bOld = I2CPORT & ~(1 << BB_SDA | 1 << BB_SCL);
@@ -237,7 +101,7 @@ namespace th
 			}
 		}
 
-		void i2cBegin(uint8_t addr)
+		static void i2cBegin(uint8_t addr)
 		{
 			I2CPORT |=  (1 << BB_SDA | 1 << BB_SCL);
 			I2CDDR  |=  (1 << BB_SDA | 1 << BB_SCL);
@@ -246,7 +110,7 @@ namespace th
 			i2cWrite(addr);
 		}
 
-		void i2cEnd()
+		static void i2cEnd()
 		{
 			I2CPORT &= ~(1 << BB_SDA);
 			I2CPORT |=  (1 << BB_SCL);
@@ -259,11 +123,11 @@ namespace th
 		const uint8_t oled_initbuf[] PROGMEM = 
 		{
 			0x00, 0xae, 0xa8, 0x3f, 0xd3, 0x00, 0x40, 0xa1,
-			0xc8, 0xda, 0x12, 0x81, 0xff, 0xa4, 0xa6, 0xd5,
+			0xc8, 0xda, 0x12, 0x81, 0x7f, 0xa4, 0xa6, 0xd5,
 			0x80, 0x8d, 0x14, 0xaf, 0x20, 0x02
 		};
 
-		void oledInit()
+		void init()
 		{
 			// Wait to initialize itself after power-on
 			_delay_ms(40);
@@ -284,29 +148,76 @@ namespace th
 			uc[1] = 0xc0;
 			oledWrite(uc, 2);
 #endif
+
+			// Clear display on power on
+			fill(0x00);
 		}
 
-		void oledWriteCommand(uint8_t c)
+		void writeCmd(uint8_t cmd)
 		{
-			uint8_t buf[] = { 0x00, c };
-			oledWrite(buf, sizeof(buf));
+			uint8_t buf[] = { SSD1306_COMMAND, cmd };
+			writeBuf(buf, sizeof(buf));
 		}
 
-		void oledWriteCommand2(uint8_t c, uint8_t d)
+		void writeCmd(uint8_t cmd, uint8_t data)
 		{
-			uint8_t buf[] = { 0x00, c, d };
-			oledWrite(buf, sizeof(buf));
+			uint8_t buf[] = { SSD1306_COMMAND, cmd, data };
+			writeBuf(buf, sizeof(buf));
 		}
 
-		void oledWrite(uint8_t *data, uint8_t len)
+		void writeBuf(uint8_t *buf, uint8_t size)
 		{
 			i2cBegin(SSD1306_SA);
-			i2cWrite(data, len);
+			i2cWrite(buf, size);
 			i2cEnd();
 		}
 
+		////////////////////////////////////////////////////////////////////////
 
+		void tunrOn()
+		{
+			writeCmd(0xAF);
+		}
 
+		void turnOff()
+		{
+			writeCmd(0xAE);
+		}
 
-	}	  // namespace display
+		void inverse(bool yes)
+		{
+			writeCmd(yes ? 0xA7 : 0xA6);
+		}
+
+		void contrast(uint8_t data)
+		{
+			writeCmd(0x81, data ? data : 0x01);
+		}
+
+		void oledSetPosition(uint8_t page, uint8_t column)
+		{
+			writeCmd(0xb0 | page);	
+			writeCmd(0x00 | (column & 0x0F));
+			writeCmd(0x10 | (column >> 4 & 0x0F));
+		}
+
+		void fill(uint8_t data)
+		{
+			uint8_t x, y;
+			uint8_t buf[17] = { SSD1306_DATA };
+
+			memset(buf + 1, data, 16);
+			for (y = 0; y < 8; y++)
+			{
+				oledSetPosition(y, 0);
+				for (x = 0; x < 8; x++)
+				{
+					writeBuf(buf, sizeof(buf));
+				}
+			}
+		}
+		
+		////////////////////////////////////////////////////////////////////////
+
+	}
 }
