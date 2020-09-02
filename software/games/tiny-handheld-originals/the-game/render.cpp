@@ -2,185 +2,192 @@
 #include "render.h"
 #include "display.h"
 
+#define IS_ON_THIS_PAGE(y) ((y) >> 3 == m_page)
+#define IS_ON_NEXT_PAGE(y) (m_pageY >= (y) && m_pageY < (y) + 8)
+
 namespace th
 {
 	namespace render
 	{
 		RenderSequence m_renderSequence;
-
-		uint8_t m_page, m_column, m_pageY, m_columnX; 
-		uint8_t m_bits, m_mask, m_composed;
-		uint8_t m_oddFrame;
+		uint8_t  m_pageR;
 
 		memory::Binary m_tileBank;
-		
+		uint8_t  m_tileWidth;
+		uint8_t  m_fontFlags;
+		uint8_t  m_asciiBase;
+
+		uint8_t* m_renderBuffer;
+		uint8_t  m_page;
+		uint8_t  m_pageY;
+		uint8_t  m_oddFrame;
+
 		////////////////////////////////////////////////////////////////////////
 
-		void reverseBits(uint8_t &a)
+		static uint8_t reverseBits(uint8_t b)
 		{
-			if (a == 0x00 || a == 0xFF)	return;
-			a = ((a >> 1) & 0x55) | ((a << 1) & 0xAA);
-			a = ((a >> 2) & 0x33) | ((a << 2) & 0xCC);
-			asm volatile("swap %0"
-						 : "=r"(a)
-						 : "0"(a));
+			b = (((b & 0xaaU) >> 1) | ((b & 0x55U) << 1));
+			b = (((b & 0xccU) >> 2) | ((b & 0x33U) << 2));
+			b = (((b & 0xf0U) >> 4) | ((b & 0x0fU) << 4));
+			return b;
+		}
+
+		static void fetchTileData(TileAddr ta, TileFlags tf, uint8_t bi, uint8_t &tb, uint8_t &tm)
+		{
+			if (tf & TF_FLIP_X)
+				ta += m_tileWidth - 1 - bi;
+			else
+				ta += bi;
+
+			tb = m_tileBank[ta];
+
+			if (tf & TF_HAS_MASK)
+				tm = m_tileBank[ta += m_tileWidth];
+			else if (tf & TF_TRANSPARENT)
+				tm = tb;
+			else
+				tm = 0xFF;
+
+			if ((tf & TF_HAS_ODD_BM) && m_oddFrame)
+				tb = m_tileBank[ta + m_tileWidth];
+
+			if (tf & TF_FLIP_Y)
+			{
+				tb = reverseBits(tb);
+				tm = reverseBits(tm);
+			}
+
+			if (tf & TF_INVERSE)
+			{
+				tb = ~tb;
+				tb &= tm;
+			}
+		}
+
+		static TileAddr getTileAddr(TileIndx ti, TileFlags tf)
+		{
+			uint8_t ts = m_tileWidth;
+			if (tf & TF_HAS_MASK)   ts += m_tileWidth;
+			if (tf & TF_HAS_ODD_BM)	ts += m_tileWidth;
+			return ti * ts;
+		}
+
+		static bool isRenderingActive()
+		{
+			return m_renderBuffer != NULL;
 		}
 
 		////////////////////////////////////////////////////////////////////////
 
 		void init()
 		{
-			// init render sequence
-			m_renderSequence = NULL;
 			m_oddFrame = false;
+			m_renderBuffer = NULL;
+			setRenderSequence(NULL);
 		}
 
 		void update()
 		{
-			if (m_renderSequence)
+			if(m_renderSequence)
 			{
-				uint8_t buf[1 + 128] = {0x40};
-				for (m_page = 0; m_page < 8; ++m_page)
+				uint8_t buf[129] = { 0x40 };
+				m_renderBuffer = &buf[0x01];
+
+				uint8_t pageL = m_pageR &  0xF;
+				uint8_t pageF = m_pageR >> 0x4;
+				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
-					display::oledWriteCommand(0xb0 | m_page);
-					display::oledWriteCommand(0x00);
-					display::oledWriteCommand(0x10);
+					display::writeCmd(0xb0 | m_page);
+		 			display::writeCmd(0x00);
+		 			display::writeCmd(0x10);
 
-					for (m_column = 0; m_column < 128;)
+					RenderSequence renderSequence = m_renderSequence;
+					while (RenderLayerCallback renderLayerCallback = pgm_read_word_near(renderSequence++))
 					{
-						m_columnX = m_column;
-						m_composed = 0x00;
-
-						RenderSequence renderSequence = m_renderSequence;
-						while (RenderLayerCallback renderLayerCallback = pgm_read_word_near(renderSequence++))
-						{
-							m_mask = 0xFF;
-							m_bits = 0x00;
-							renderLayerCallback();
-							m_composed &= m_mask;
-							m_composed |= m_bits;
-						}
-						buf[++m_column] = m_composed;
+						renderLayerCallback();
 					}
-					display::oledWrite(buf, sizeof(buf));
+					display::writeBuf(buf, sizeof(buf));
 				}
 			}
+
+			m_renderBuffer = NULL;
 			m_oddFrame ^= true;
 		}
 
-		void setRenderSequence(RenderSequence renderSequence)
+		void setRenderSequence(RenderSequence renderSequence, uint8_t pageR)
 		{
-			m_renderSequence = renderSequence;
-		}
-
-		void flushRenderContext()
-		{
-			m_composed &= m_mask;
-			m_composed |= m_bits;
-
-			m_mask = 0xFF;
-			m_bits = 0x00;
-		}
-
-		void setScrollX(int8_t sx)
-		{
-			m_columnX = m_column + sx;
-		}
-
-		void setTileBank(const memory::Binary& tileBank)
-		{
-			m_tileBank = tileBank;
-		}
-
-		TileAddr getTileAddr(TileFlags tf, TileIndx ti)
-		{
-			uint8_t tileW = tf & TF_WIDTH_BITS;
-			uint8_t tileS = tileW;
-
-			if (tf & TF_HAS_MASK) tileS += tileW;
-			if (tf & TF_HAS_ODD_BM)	tileS += tileW;
-
-			return ti * tileS;
-		}
-
-		void fetchTileData(TileAddr tileDataAddr, TileFlags tf, uint8_t x, uint8_t &tileB, uint8_t &tileM)
-		{
-			if (tf & TF_FLIP_X)
-				tileDataAddr += ((tf & TF_WIDTH_BITS) - 1) - (m_columnX - x);
-			else
-				tileDataAddr += m_columnX - x;
-
-			tileB = m_tileBank[tileDataAddr];
-
-			if (tf & TF_HAS_MASK)
-				tileM = m_tileBank[tileDataAddr += (tf & TF_WIDTH_BITS)];
-			else if (tf & TF_TRANSPARENT)
-				tileM = tileB;
-			else
-				tileM = 0xFF;
-
-			if ((tf & TF_HAS_ODD_BM) && m_oddFrame)
-				tileB = m_tileBank[tileDataAddr + (tf & TF_WIDTH_BITS)];
-
-			if (tf & TF_FLIP_Y)
+			if (!isRenderingActive())
 			{
-				reverseBits(tileB);
-				reverseBits(tileM);
-			}
-
-			if (tf & TF_INVERSE)
-			{
-				tileB = ~tileB;
-				tileB &= tileM;
+				m_renderSequence = renderSequence;
+				m_pageR = pageR & 0x77;
 			}
 		}
 
-#define IS_ON_THIS_COLUMN(x, w) (m_columnX >= (x) && m_columnX < (x) + (w))
-#define IS_ON_THIS_PAGE(y)      ((y) >> 3 == m_page)
-#define IS_ON_NEXT_PAGE(y)      (m_pageY >= (y) && m_pageY < (y) + 8)
-
-		void renderTile(TileAddr tileAddr, TileFlags tf, uint8_t x, uint8_t y)
+		void setTileBank(const memory::Binary& tileBank, uint8_t tw)
 		{
-			uint8_t shift, tileB, tileM;
-			if (IS_ON_THIS_COLUMN(x, tf & TF_WIDTH_BITS))
+			m_tileBank  = tileBank;
+			m_tileWidth = tw;
+		}
+
+		void setFontData(const FontData &fontData)
+		{
+			m_tileBank  = memory::Binary::InFLASH(fontData.tileBank); // !!!
+			m_fontFlags = fontData.tileFlags & (TF_CONFIG_BITS);
+			m_tileWidth = fontData.tileWidth;
+			m_asciiBase = fontData.asciiBase;
+		}
+
+		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta)
+		{
+			uint8_t bs, bi, tb, tm;
+			if (IS_ON_THIS_PAGE(y))
 			{
-				if (IS_ON_THIS_PAGE(y))
+				// Case #1 : top tile half
+				bs = y & 0x07;
+				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
 				{
-					// Case #1 : top tile half
-					fetchTileData(tileAddr, tf, x, tileB, tileM);
-					shift = y & 0x07;
-
-					m_bits |= tileB << shift;
-					m_mask &= ~(tileM << shift);
+					fetchTileData(ta, tf, bi, tb, tm);
+					m_renderBuffer[x] &= ~(tm << bs);
+					m_renderBuffer[x] |= tb << bs;
 				}
-				else if (IS_ON_NEXT_PAGE(y))
+			}
+			else if (IS_ON_NEXT_PAGE(y))
+			{
+				// Case #2 : bottom tile half
+				bs = m_pageY - y;
+				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
 				{
-					// Case #2 : bottom tile half
-					fetchTileData(tileAddr, tf, x, tileB, tileM);
-					shift = m_pageY - y;
-
-					m_bits |= tileB >> shift;
-					m_mask &= ~(tileM >> shift);
+					fetchTileData(ta, tf, bi, tb, tm);
+					m_renderBuffer[x] &= ~(tm >> bs);
+					m_renderBuffer[x] |= tb >> bs;
 				}
 			}
 		}
 
-		void renderText(const FontData &fontData, TileFlags tf, int8_t x, int8_t y, const char *text, uint8_t len)
+		void renderChar(TileFlags tf, uint8_t x, uint8_t y, char ch)
 		{
-			uint8_t tileW = fontData.tileFlags & TF_WIDTH_BITS;
-			uint8_t dispW = tf & TF_WIDTH_BITS;
+			tf &= TF_CONTROL_BITS;
+			tf |= m_fontFlags;
+			renderTile(tf, x, y, getTileAddr(ch - m_asciiBase, tf));
+		}
 
-			if (IS_ON_THIS_COLUMN(x, dispW * len) && (IS_ON_THIS_PAGE(y) || IS_ON_NEXT_PAGE(y)))
+		void renderText(TileFlags tf, uint8_t x, uint8_t y, const char *text, uint8_t len)
+		{
+			uint8_t i;
+			if (IS_ON_THIS_PAGE(y) || IS_ON_NEXT_PAGE(y))
 			{
-				setTileBank(memory::Binary::InFLASH(fontData.tileBank)); // !!!
 				tf &= TF_CONTROL_BITS;
-				tf |= fontData.tileFlags & (TF_CONFIG_BITS | TF_WIDTH_BITS);
+				tf |= m_fontFlags;
 
-				uint8_t i = (m_columnX - x) / dispW, tx = i * dispW + x;
-				renderTile(getTileAddr(tf, text[i] - fontData.asciiBase), tf, tx, y);
+				for (i = 0; i < len && text[i]; ++i, x += m_tileWidth)
+				{
+					renderTile(tf, x, y, getTileAddr(text[i] - m_asciiBase, tf));
+				}
 			}
 		}
 
-	} // namespace render
-} // namespace th
+		////////////////////////////////////////////////////////////////////////
+
+	}
+} 
