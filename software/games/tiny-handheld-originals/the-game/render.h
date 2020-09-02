@@ -17,7 +17,7 @@ namespace th
 
 		// tile data access type defs
 		typedef uint16_t TileAddr;
-		typedef uint8_t TileIndx;
+		typedef uint8_t  TileIndx;
 
 		// tile data type defs
 		enum TileFlags : uint8_t
@@ -49,8 +49,8 @@ namespace th
 		void init();
 		void update();
 
-		void setRenderSequence(RenderSequence renderSequence, uint8_t pageR = 0x07);
-		void setTileBank(const memory::Binary& tileBank, uint8_t tw = 8);
+		void setRenderSequence(RenderSequence renderSequence, uint8_t pageRange = 0x07);
+		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth = 8);
 		void setFontData(const FontData &fontData);
 		
 		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta);

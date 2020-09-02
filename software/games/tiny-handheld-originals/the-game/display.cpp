@@ -194,7 +194,7 @@ namespace th
 			writeCmd(0x81, data ? data : 0x01);
 		}
 
-		void oledSetPosition(uint8_t page, uint8_t column)
+		void position(uint8_t page, uint8_t column)
 		{
 			writeCmd(0xb0 | page);	
 			writeCmd(0x00 | (column & 0x0F));
@@ -209,7 +209,7 @@ namespace th
 			memset(buf + 1, data, 16);
 			for (y = 0; y < 8; y++)
 			{
-				oledSetPosition(y, 0);
+				position(y, 0);
 				for (x = 0; x < 8; x++)
 				{
 					writeBuf(buf, sizeof(buf));

@@ -26,9 +26,9 @@ namespace th
 
 		static uint8_t reverseBits(uint8_t b)
 		{
-			b = (((b & 0xaaU) >> 1) | ((b & 0x55U) << 1));
-			b = (((b & 0xccU) >> 2) | ((b & 0x33U) << 2));
-			b = (((b & 0xf0U) >> 4) | ((b & 0x0fU) << 4));
+			b = (((b & 0xAAu) >> 1) | ((b & 0x55u) << 1));
+			b = (((b & 0xCCu) >> 2) | ((b & 0x33u) << 2));
+			b = (((b & 0xF0u) >> 4) | ((b & 0x0Fu) << 4));
 			return b;
 		}
 
@@ -93,8 +93,8 @@ namespace th
 				uint8_t buf[129] = { 0x40 };
 				m_renderBuffer = &buf[0x01];
 
-				uint8_t pageL = m_pageR &  0xF;
 				uint8_t pageF = m_pageR >> 0x4;
+				uint8_t pageL = m_pageR &  0xF;
 				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
@@ -102,11 +102,8 @@ namespace th
 		 			display::writeCmd(0x00);
 		 			display::writeCmd(0x10);
 
-					RenderSequence renderSequence = m_renderSequence;
-					while (RenderLayerCallback renderLayerCallback = pgm_read_word_near(renderSequence++))
-					{
-						renderLayerCallback();
-					}
+					RenderSequence rs = m_renderSequence;
+					while (RenderLayerCallback rlc = pgm_read_word(rs++)) rlc();
 					display::writeBuf(buf, sizeof(buf));
 				}
 			}
@@ -115,24 +112,24 @@ namespace th
 			m_oddFrame ^= true;
 		}
 
-		void setRenderSequence(RenderSequence renderSequence, uint8_t pageR)
+		void setRenderSequence(RenderSequence renderSequence, uint8_t pageRange)
 		{
 			if (!isRenderingActive())
 			{
 				m_renderSequence = renderSequence;
-				m_pageR = pageR & 0x77;
+				m_pageR = pageRange & 0x77;
 			}
 		}
 
-		void setTileBank(const memory::Binary& tileBank, uint8_t tw)
+		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth)
 		{
 			m_tileBank  = tileBank;
-			m_tileWidth = tw;
+			m_tileWidth = tileWidth;
 		}
 
 		void setFontData(const FontData &fontData)
 		{
-			m_tileBank  = memory::Binary::InFLASH(fontData.tileBank); // !!!
+			m_tileBank  = memory::Binary::InFLASH(fontData.tileBank); // TODO !!!
 			m_fontFlags = fontData.tileFlags & (TF_CONFIG_BITS);
 			m_tileWidth = fontData.tileWidth;
 			m_asciiBase = fontData.asciiBase;
