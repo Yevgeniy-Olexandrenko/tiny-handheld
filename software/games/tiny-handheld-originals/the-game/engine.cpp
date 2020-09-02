@@ -6,11 +6,13 @@ namespace th
 	{
 		void init()
 		{
-			input::init();
-			display::oledInit();
+			// init hardware layer
+			display::init();
 			sound::init();
+			input::init();
 			eeprom::init();
 
+			// init software layer
 			render::init();
 		}
 	}

@@ -222,11 +222,10 @@ const uint8_t tile_box_quater[] PROGMEM =
 
 const th::render::FontData font6x8 PROGMEM =
 {
-	tileBank_font6x8, 6, ' '
+	tileBank_font6x8, th::render::TileFlags::TF_EMPTY, 6, ' '
 };
 
 int8_t s = 2;
-int8_t w = 8;
 int8_t y = 0, dy = 1;
 int8_t x = 0, dx = 1;
 
@@ -236,16 +235,16 @@ uint8_t fps;
 
 void RenderBackground()
 {
-	th::render::setScrollX(x * 2 - 127);
+	for (uint8_t col = 0; col < 128; ++col)
+	{
 #if 0
-  th::render::setScrollX(x);
-	uint16_t index = renderContext.page * 128 + (renderContext.columnX & 0x7F);
-	renderContext.bits = pgm_read_byte(&picture[index]);
+  	uint16_t index = th::render::m_page * 128 + col;
+  	th::render::m_renderBuffer[col] = pgm_read_byte(&picture[index]);
 #else
-	uint8_t &col = th::render::m_columnX;
-	bool isSolid = (th::render::m_page & 0x01) ^ (col >> 3 & 0x01);
-	th::render::m_bits = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::render::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
+		bool isSolid = (th::render::m_page & 0x01) ^ (col >> 3 & 0x01);
+		th::render::m_renderBuffer[col] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::render::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
 #endif
+	}
 }
 
 //void RenderLogo(int8_t x, int8_t y)
@@ -265,15 +264,13 @@ void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 		{
 			th::render::TileFlags flipY = (yy & 0x01) ? th::render::TF_EMPTY : th::render::TF_FLIP_Y;
 			th::render::TileFlags flipX = (xx & 0x01) ? th::render::TF_FLIP_X : th::render::TF_EMPTY;
-			th::render::renderTile(0, tileF | flipX | flipY | w, x + xx * w, y + yy * w);
+			th::render::renderTile(tileF | flipX | flipY, x + xx * 8, y + yy * 8, 0);
 		}
 	}
 }
 
 void RenderForeground()
 {
-	th::render::setScrollX(0);
-
 	//	RenderLogo(x, y);
 	//	th::render::flushRenderContext();
 
@@ -284,24 +281,22 @@ void RenderForeground()
 	//	tileF |= th::render::TF_INVERSE;
 
 	RenderSprite(x, y, tileF);
-	th::render::flushRenderContext();
 
-	th::render::renderText(font6x8, 6, 128 - x, y + 4, "Some text!", 10);
-	th::render::flushRenderContext();
+	th::render::setFontData(font6x8);
+	th::render::renderText(th::render::TileFlags::TF_EMPTY, 128 - x, y + 4, "Some text!", 10);
 
 	RenderSprite(x + 4, 64 - y, tileF);
 }
 
 void RenderFPS()
 {
-	th::render::setScrollX(0);
-
-	char buffer[3] = {0};
-	buffer[0] = '0' + (fps / 10);
-	buffer[1] = '0' + (fps % 10);
-
-	th::render::renderText(font6x8, 6, 0, 0, buffer, 2);
-	th::render::flushRenderContext();
+	uint8_t f = fps;
+	th::render::setFontData(font6x8);
+	for (uint8_t x = 0; x <= 12; x += 6)
+	{
+		th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 - x, 0, '0' + (f % 10));
+		f /= 10;
+	}
 }
 
 const th::render::RenderLayerCallback renderSequence[] PROGMEM =

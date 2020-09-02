@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h>
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <util/delay.h>
