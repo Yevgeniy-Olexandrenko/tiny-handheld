@@ -1,28 +1,22 @@
 #pragma once
 
+#include "memory.h"
+
 namespace th
 {
 	namespace render
 	{
-		// rendering sequence type defs
-		struct RenderContext
-		{
-			uint8_t page, pageY;
-			uint8_t column, columnX;
-			uint8_t bits, mask, composed;
-			uint8_t isOddFrame;
-		};
-		typedef void (*RenderLayerCallback)(RenderContext& renderContext);
+		// rendering sequence type defs and rendering context
+		typedef void (*RenderLayerCallback)();
 		typedef const RenderLayerCallback * RenderSequence;
 
+		extern uint8_t m_page, m_column, m_pageY, m_columnX; 
+		extern uint8_t m_bits, m_mask, m_composed;
+		extern uint8_t m_oddFrame;
+
 		// tile data access type defs
-		enum TileStorage : uint8_t
-		{
-			TS_SRAM, TS_PROGMEM, TS_EEPROM, TS_UNCHANGED
-		};
-		typedef const uint8_t* TileBankAddr;
-		typedef uint16_t TileDataAddr;
-		typedef uint8_t TileIndex;
+		typedef uint16_t TileAddr;
+		typedef uint8_t  TileIndx;
 
 		// tile data type defs
 		enum TileFlags : uint16_t
@@ -44,10 +38,9 @@ namespace th
 		// font data type defs
 		struct FontData
 		{
-			TileStorage tileStorage;
-			TileBankAddr tileBankAddr;
+			const uint8_t* tileBank;
 			TileFlags tileFlags;
-			uint8_t asciiOffset;
+			uint8_t asciiBase;
 		};
 
 		void init();
@@ -56,11 +49,11 @@ namespace th
 		void setRenderSequence(RenderSequence renderSequence);
 		void flushRenderContext();
 
-    void setScrollX(int8_t sx);
-		void setTileBank(TileStorage tileStorage, TileBankAddr tileBankAddr);
-		TileDataAddr getTileDataAddr(TileFlags tileF, TileIndex tileI);
+		void setScrollX(int8_t sx);
+		void setTileBank(const memory::Binary& tileBank);
+		TileAddr getTileAddr(TileFlags tf, TileIndx ti);
 
-		void renderTile(TileDataAddr tileDataAddr, TileFlags tileF, uint8_t x, uint8_t y);
-		void renderText(const FontData& fontData, TileFlags tileF, int8_t x, int8_t y, const char* text, uint8_t length);
+		void renderTile(TileAddr tileAddr, TileFlags tf, uint8_t x, uint8_t y);
+		void renderText(const FontData &fontData, TileFlags tf, int8_t x, int8_t y, const char *text, uint8_t len);
 	}
 }

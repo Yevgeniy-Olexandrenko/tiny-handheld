@@ -4,7 +4,7 @@
 #include "font6x8.h"
 #include "boot.h"
 
-const uint8_t picture [] PROGMEM =
+const uint8_t picture [] IN_FLASH =
  {
 	0x00,0x03,0x05,0x09,0x11,0xFF,0x11,0x89,0x05,0xC3,0x00,0xE0,0x00,0xF0,0x00,0xF8,
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x44,0x28,0xFF,0x11,0xAA,0x44,0x00,0x00,0x00,
@@ -71,6 +71,11 @@ const uint8_t picture [] PROGMEM =
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7F,0x03,0x0C,0x30,0x0C,0x03,0x7F,
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
+
+//th::memory::Binary pic = th::memory::Binary::InFLASH(NULL);
+//th::memory::Binary pic2 = pic;
+//uint8_t value = pic2[0];
+
 
 const uint8_t tile_empty[] PROGMEM =
 {
@@ -153,7 +158,7 @@ const uint8_t tile_triangle[] PROGMEM =
 	0b00000000,
 };
 
-const uint8_t tile_square[] PROGMEM =
+const uint8_t tile_square[] IN_FLASH =
 {
   // bits A
   0b00000000,
@@ -217,7 +222,7 @@ const uint8_t tile_box_quater[] PROGMEM =
 
 const th::render::FontData font6x8 PROGMEM =
 {
-	th::render::TS_PROGMEM, tileBank_font6x8, 6, ' '
+	tileBank_font6x8, 6, ' '
 };
 
 int8_t s = 2;
@@ -229,7 +234,7 @@ uint32_t saved_time;
 uint8_t frame_count;
 uint8_t fps;
 
-void RenderBackground(th::render::RenderContext &renderContext)
+void RenderBackground()
 {
 	th::render::setScrollX(x * 2 - 127);
 #if 0
@@ -237,23 +242,23 @@ void RenderBackground(th::render::RenderContext &renderContext)
 	uint16_t index = renderContext.page * 128 + (renderContext.columnX & 0x7F);
 	renderContext.bits = pgm_read_byte(&picture[index]);
 #else
-	uint8_t &col = renderContext.columnX;
-	bool isSolid = (renderContext.page & 0x01) ^ (col >> 3 & 0x01);
-	renderContext.bits = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ renderContext.isOddFrame ? 0xAB : 0xD5))) : 0x00;
+	uint8_t &col = th::render::m_columnX;
+	bool isSolid = (th::render::m_page & 0x01) ^ (col >> 3 & 0x01);
+	th::render::m_bits = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::render::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
 #endif
 }
 
-void RenderLogo(int8_t x, int8_t y)
-{
-	th::render::TileFlags tileF = 48;
-	th::render::setTileBank(th::render::TS_PROGMEM, th::boot::logo);
-	th::render::renderTile(th::render::getTileDataAddr(tileF, 0), tileF, x, y + 0);
-	th::render::renderTile(th::render::getTileDataAddr(tileF, 1), tileF, x, y + 8);
-}
+//void RenderLogo(int8_t x, int8_t y)
+//{
+//	th::render::TileFlags tileF = 48;
+//	th::render::setTileBank(th::render::TS_PROGMEM, th::boot::logo);
+//	th::render::renderTile(th::render::getTileAddr(tileF, 0), tileF, x, y + 0);
+//	th::render::renderTile(th::render::getTileAddr(tileF, 1), tileF, x, y + 8);
+//}
 
 void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 {
-	th::render::setTileBank(th::render::TS_PROGMEM, tile_square);
+	th::render::setTileBank(th::memory::Binary::InFLASH(tile_square));
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
@@ -265,7 +270,7 @@ void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 	}
 }
 
-void RenderForeground(th::render::RenderContext &renderContext)
+void RenderForeground()
 {
 	th::render::setScrollX(0);
 
@@ -287,7 +292,7 @@ void RenderForeground(th::render::RenderContext &renderContext)
 	RenderSprite(x + 4, 64 - y, tileF);
 }
 
-void RenderFPS(th::render::RenderContext &renderContext)
+void RenderFPS()
 {
 	th::render::setScrollX(0);
 
