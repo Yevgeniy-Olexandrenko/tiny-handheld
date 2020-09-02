@@ -9,6 +9,7 @@
 #include "eeprom.h"
 
 // High level hardware support
+#include "memory.h"
 #include "render.h"
 
 namespace th
