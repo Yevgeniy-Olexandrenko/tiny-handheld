@@ -4,38 +4,18 @@
 #define SSD1306_COMMAND 0x00
 #define SSD1306_DATA    0x40
 
+#if F_CPU > 8000000L
+ // compiles to cbi instruction taking 2 clock cycles, extending the clock pulse
+#define I2C_CLK_LOW() I2CPORT &= ~(1 << BB_SCL)
+#else
+// setting a port instruction takes 1 clock cycle
+#define I2C_CLK_LOW() I2CPORT = bOld 
+#endif
+
 namespace th
 {
 	namespace display
 	{
-//		// Some code based on "IIC_wtihout_ACK" by http://www.14blog.com/archives/1358
-//		const uint8_t initSequence [] PROGMEM = 
-//		{
-//			0xAE,             // Set Display ON/OFF - AE=OFF, AF=ON
-//			0xD5, 0xF0,       // Set display clock divide ratio/oscillator frequency, set divide ratio
-//			0xA8, 0x3F,       // Set multiplex ratio (1 to 64) ... (height - 1)
-//			0xD3, 0x00,       // Set display offset. 00 = no offset
-//			0x40 | 0x00,      // Set start line address, at 0.
-//			0x8D, 0x14,       // Charge Pump Setting, 14h = Enable Charge Pump
-//			0x20, 0x00,       // Set Memory Addressing Mode - 00=Horizontal, 01=Vertical, 10=Page, 11=Invalid
-//			0xA0 | 0x01,      // Set Segment Re-map
-//			0xC8,             // Set COM Output Scan Direction
-//			0xDA, 0x12,       // Set COM Pins Hardware Configuration - 128x32:0x02, 128x64:0x12
-//			0x81, 0x3F,       // Set contrast control register
-//			0xD9, 0x22,       // Set pre-charge period (0x22 or 0xF1)
-//			0xDB, 0x20,       // Set Vcomh Deselect Level - 0x00: 0.65 x VCC, 0x20: 0.77 x VCC (RESET), 0x30: 0.83 x VCC
-//			0xA4,             // Entire Display ON (resume) - output RAM to display
-//			0xA6,             // Set Normal/Inverse Display mode. A6=Normal; A7=Inverse
-//			0x2E,             // Deactivate Scroll command
-//			0xAF,             // Set Display ON/OFF - AE=OFF, AF=ON
-//			0x22, 0x00, 0x3f, // Set Page Address (start,end)
-//			0x21, 0x00, 0x7f, // Set Column Address (start,end)
-//		};
-
-		////////////////////////////////////////////////////////////////////////
-		////////////////////////////////////////////////////////////////////////
-		////////////////////////////////////////////////////////////////////////
-   
 		static void i2cWrite(uint8_t b)
 		{
 			uint8_t i;
@@ -48,12 +28,12 @@ namespace th
 
 				I2CPORT = bOld;
 				I2CPORT |= (1 << BB_SCL);
-				I2CPORT = bOld;
+				I2C_CLK_LOW();
 				b <<= 1;
 			}
 			I2CPORT = bOld & ~(1 << BB_SDA);
 			I2CPORT |= (1 << BB_SCL);
-			I2CPORT = bOld;
+			I2C_CLK_LOW();
 		}
 
 		static void i2cWrite(uint8_t *pData, uint8_t bLen)
@@ -75,7 +55,7 @@ namespace th
 					{
 						// just toggle SCL, SDA stays the same
 						I2CPORT |= (1 << BB_SCL);
-						I2CPORT = bOld;
+						I2C_CLK_LOW();
 					}
 				}
 				else
@@ -89,7 +69,7 @@ namespace th
 
 						I2CPORT = bOld;
 						I2CPORT |= (1 << BB_SCL);
-						I2CPORT = bOld;
+						I2C_CLK_LOW();
 						b <<= 1;
 					}
 				}
@@ -120,11 +100,34 @@ namespace th
 
 		////////////////////////////////////////////////////////////////////////
 
-		const uint8_t oled_initbuf[] PROGMEM = 
+		const uint8_t oled_initbuf[] PROGMEM =
 		{
+#if 1
 			0x00, 0xae, 0xa8, 0x3f, 0xd3, 0x00, 0x40, 0xa1,
 			0xc8, 0xda, 0x12, 0x81, 0x7f, 0xa4, 0xa6, 0xd5,
 			0x80, 0x8d, 0x14, 0xaf, 0x20, 0x02
+#else
+			0x00,
+			0xAE,			  // Set Display ON/OFF - AE=OFF, AF=ON
+			0xD5, 0xF0,		  // Set display clock divide ratio/oscillator frequency, set divide ratio
+			0xA8, 0x3F,		  // Set multiplex ratio (1 to 64) ... (height - 1)
+			0xD3, 0x00,		  // Set display offset. 00 = no offset
+			0x40 | 0x00,	  // Set start line address, at 0.
+			0x8D, 0x14,		  // Charge Pump Setting, 14h = Enable Charge Pump
+			0x20, 0x00,		  // Set Memory Addressing Mode - 00=Horizontal, 01=Vertical, 10=Page, 11=Invalid
+			0xA0 | 0x01,	  // Set Segment Re-map
+			0xC8,			  // Set COM Output Scan Direction
+			0xDA, 0x12,		  // Set COM Pins Hardware Configuration - 128x32:0x02, 128x64:0x12
+			0x81, 0x3F,		  // Set contrast control register
+			0xD9, 0x22,		  // Set pre-charge period (0x22 or 0xF1)
+			0xDB, 0x20,		  // Set Vcomh Deselect Level - 0x00: 0.65 x VCC, 0x20: 0.77 x VCC (RESET), 0x30: 0.83 x VCC
+			0xA4,			  // Entire Display ON (resume) - output RAM to display
+			0xA6,			  // Set Normal/Inverse Display mode. A6=Normal; A7=Inverse
+			0x2E,			  // Deactivate Scroll command
+			0xAF,			  // Set Display ON/OFF - AE=OFF, AF=ON
+			0x22, 0x00, 0x3f, // Set Page Address (start,end)
+			0x21, 0x00, 0x7f, // Set Column Address (start,end)
+#endif
 		};
 
 		void init()
