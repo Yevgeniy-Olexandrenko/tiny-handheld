@@ -1,6 +1,6 @@
 #include "commons.h"
 #include "memory.h"
-#include "eeprom.h"
+#include "board/eeprom.h"
 
 namespace th
 {

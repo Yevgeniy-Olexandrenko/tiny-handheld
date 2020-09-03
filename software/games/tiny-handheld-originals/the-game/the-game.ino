@@ -1,8 +1,8 @@
 #pragma once
 
-#include "engine.h"
-#include "font6x8.h"
-#include "boot.h"
+#include "src/engine.h"
+#include "src/assets/fonts.h"
+#include "src/boot.h"
 
 const uint8_t picture [] IN_FLASH =
  {
@@ -217,7 +217,7 @@ const uint8_t tile_box_quater[] PROGMEM =
 
 const th::render::FontData font6x8 PROGMEM =
 {
-	tileBank_font6x8, th::render::TileFlags::TF_EMPTY, 6, ' '
+	th::assets::tile_bank_font6x8, th::render::TileFlags::TF_EMPTY, 6, ' '
 };
 
 int8_t s = 2;

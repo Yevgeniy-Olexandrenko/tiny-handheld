@@ -1,3 +1,4 @@
+#include "../commons.h"
 #include "input.h"
 
 namespace th

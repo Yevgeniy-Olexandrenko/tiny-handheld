@@ -1,6 +1,6 @@
 #include "commons.h"
 #include "render.h"
-#include "display.h"
+#include "board/display.h"
 
 #define IS_ON_THIS_PAGE(y) ((y) >> 3 == m_page)
 #define IS_ON_NEXT_PAGE(y) (m_pageY >= (y) && m_pageY < (y) + 8)
