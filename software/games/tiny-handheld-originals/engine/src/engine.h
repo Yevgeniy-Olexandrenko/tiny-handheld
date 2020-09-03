@@ -3,6 +3,7 @@
 #include "commons.h"
 
 // Low level hardware support
+#include "board/mcu.h"
 #include "board/battery.h"
 #include "board/input.h"
 #include "board/display.h"
@@ -13,10 +14,15 @@
 #include "memory.h"
 #include "render.h"
 
+// Definitions
+#define FPS_HIGH WDT_TIMEOUT_16MS
+#define FPS_LOW  WDT_TIMEOUT_32MS
+#define FPS_ULOW WDT_TIMEOUT_500MS
+
 namespace th
 {
 	namespace engine
 	{
-		//
+		void setFPS(uint8_t fps);
 	}
 }

@@ -12,17 +12,31 @@ namespace th
 {
 	namespace engine
 	{
+		volatile bool m_sleeping = false;
+
+		void waitNextFrame()
+		{
+			m_sleeping = true;
+			while (m_sleeping)
+			{
+				sleep_enable();
+				sleep_mode();
+			}
+		}
+
 		void init()
 		{
 			// init hardware layer
+			mcu::init();
 			battery::init();
 			display::init();
-			sound::init();
-			input::init();
 			eeprom::init();
+			input::init();
+			sound::init();
 
 			// init software layer
 			render::init();
+			setFPS(FPS_HIGH);
 
 			// init main programm
 			setup();
@@ -30,16 +44,26 @@ namespace th
 
 		void update()
 		{
-			// update user input
 			input::update();
-
-			// update main programm
 			loop();
-
-			// update programm output
 			render::update();
+			waitNextFrame();
+		}
+
+		void setFPS(uint8_t fps)
+		{
+			cli();
+			mcu::wdtDisable();
+			set_sleep_mode(SLEEP_MODE_IDLE);
+			mcu::wdtEnable(WDT_MODE_INT, fps);
+			sei();
 		}
 	}
+}
+
+ISR(WDT_vect)
+{
+	th::engine::m_sleeping = false;	
 }
 
 int main(void)
