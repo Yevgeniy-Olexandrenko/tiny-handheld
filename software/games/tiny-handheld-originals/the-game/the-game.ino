@@ -2,7 +2,6 @@
 
 #include "src/engine.h"
 #include "src/assets/fonts.h"
-#include "src/boot.h"
 
 const uint8_t picture [] IN_FLASH =
  {
@@ -215,10 +214,7 @@ const uint8_t tile_box_quater[] PROGMEM =
   0b01011111,
 };
 
-const th::render::FontData font6x8 PROGMEM =
-{
-	th::assets::tile_bank_font6x8, th::render::TileFlags::TF_EMPTY, 6, ' '
-};
+
 
 int8_t s = 2;
 int8_t y = 0, dy = 1;
@@ -242,14 +238,6 @@ void RenderBackground()
 	}
 }
 
-//void RenderLogo(int8_t x, int8_t y)
-//{
-//	th::render::TileFlags tileF = 48;
-//	th::render::setTileBank(th::render::TS_PROGMEM, th::boot::logo);
-//	th::render::renderTile(th::render::getTileAddr(tileF, 0), tileF, x, y + 0);
-//	th::render::renderTile(th::render::getTileAddr(tileF, 1), tileF, x, y + 8);
-//}
-
 void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 {
 	th::render::setTileBank(th::memory::Binary::InFLASH(tile_square));
@@ -266,9 +254,6 @@ void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 
 void RenderForeground()
 {
-	//	RenderLogo(x, y);
-	//	th::render::flushRenderContext();
-
 	th::render::TileFlags tileF;
 	tileF |= th::render::TF_HAS_MASK;
 	//	tileF |= th::render::TF_HAS_ODD_BM;
@@ -277,7 +262,7 @@ void RenderForeground()
 
 	RenderSprite(x, y, tileF);
 
-	th::render::setFontData(font6x8);
+	th::render::setFontData(th::assets::font6x8);
 	th::render::renderText(th::render::TileFlags::TF_EMPTY, 128 - x, y + 4, "Some text!", 10);
 
 	RenderSprite(x + 4, 64 - y, tileF);
@@ -286,7 +271,7 @@ void RenderForeground()
 void RenderFPS()
 {
 	uint8_t f = fps;
-	th::render::setFontData(font6x8);
+	th::render::setFontData(th::assets::font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
 		th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 - x, 0, '0' + (f % 10));

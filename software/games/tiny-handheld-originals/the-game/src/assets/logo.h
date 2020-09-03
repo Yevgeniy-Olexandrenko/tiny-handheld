@@ -2,7 +2,7 @@
 
 namespace th
 {
-	namespace boot
+	namespace assets
 	{
 		const uint8_t logo [] PROGMEM =
 		{
