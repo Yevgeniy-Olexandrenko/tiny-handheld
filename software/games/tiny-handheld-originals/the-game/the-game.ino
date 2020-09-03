@@ -72,11 +72,6 @@ const uint8_t picture [] IN_FLASH =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
-//th::memory::Binary pic = th::memory::Binary::InFLASH(NULL);
-//th::memory::Binary pic2 = pic;
-//uint8_t value = pic2[0];
-
-
 const uint8_t tile_empty[] PROGMEM =
 {
 	// bits A
@@ -313,7 +308,6 @@ void setup()
 	frame_count = 0;
 	fps = 0;
 
-	th::engine::init();
 	th::render::setRenderSequence(renderSequence);
 }
 
@@ -333,6 +327,4 @@ void loop()
 
 	if (y == 0 || y == 63) dy = -dy;
 	if (x == 0 || x == 127) dx = -dx;
-
-	th::render::update();
 }

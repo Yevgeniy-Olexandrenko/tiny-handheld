@@ -3,6 +3,7 @@
 #include "commons.h"
 
 // Low level hardware support
+#include "battery.h"
 #include "input.h"
 #include "display.h"
 #include "sound.h"
@@ -16,6 +17,6 @@ namespace th
 {
 	namespace engine
 	{
-		void init();
+		//
 	}
 }

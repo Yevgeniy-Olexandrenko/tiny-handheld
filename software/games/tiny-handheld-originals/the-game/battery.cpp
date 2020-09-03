@@ -1,15 +1,11 @@
+#include "commons.h"
 #include "input.h"
 
 namespace th
 {
-	namespace input
+	namespace battery
 	{
 		void init()
-		{
-			//
-		}
-
-		void update()
 		{
 			//
 		}

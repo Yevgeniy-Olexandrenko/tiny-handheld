@@ -7,5 +7,6 @@ namespace th
 	namespace input
 	{
 		void init();
+		void update();
 	}
 }
