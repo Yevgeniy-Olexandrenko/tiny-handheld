@@ -30,7 +30,6 @@ namespace th
 		{
 			// init hardware layer
 			mcu::init();
-			battery::init();
 			display::init();
 			eeprom::init();
 			input::init();

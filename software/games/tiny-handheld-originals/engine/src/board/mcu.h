@@ -26,5 +26,9 @@ namespace th
 		void wdtEnable(uint8_t mode, uint8_t prescaler);
 		void wdtDisable();
 		void wdtReset();
+
+		uint16_t getVCC();
+		uint16_t getBatteryVoltage();
+		uint8_t  getBatteryPercent();
 	}
 }

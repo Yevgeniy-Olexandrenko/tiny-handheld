@@ -4,7 +4,6 @@
 
 // Low level hardware support
 #include "board/mcu.h"
-#include "board/battery.h"
 #include "board/input.h"
 #include "board/display.h"
 #include "board/sound.h"

@@ -279,11 +279,24 @@ void RenderFPS()
 	}
 }
 
+void RenderBattery()
+{
+	uint8_t bat = th::mcu::getBatteryPercent();
+	th::render::setFontData(th::assets::font6x8);
+	for (uint8_t x = 0; x <= 12; x += 6)
+	{
+		th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
+		bat /= 10;
+	}
+	th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 + 6, 64-8, '%');
+}
+
 void RenderSequence()
 {
 	RenderBackground();
-	RenderForeground();
-	RenderFPS();
+//	RenderForeground();
+	RenderBattery();
+//	RenderFPS();
 }
 
 void setup()
