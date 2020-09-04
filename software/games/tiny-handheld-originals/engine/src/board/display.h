@@ -24,7 +24,7 @@ namespace th
 	namespace display
 	{
 		void init();
-		void update() DO_NOTHING
+		void update();
 
 		// Low level access to hardware
 		void writeCmd(uint8_t  cmd);

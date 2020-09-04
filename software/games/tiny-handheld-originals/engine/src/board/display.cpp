@@ -156,6 +156,8 @@ namespace th
 			fill(0x00);
 		}
 
+		void update() {}
+
 		void writeCmd(uint8_t cmd)
 		{
 			uint8_t buf[] = { SSD1306_COMMAND, cmd };

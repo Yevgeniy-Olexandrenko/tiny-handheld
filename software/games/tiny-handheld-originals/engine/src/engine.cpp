@@ -33,7 +33,7 @@ namespace th
 			battery::init();
 			buttons::init();
 			display::init();
-			buzzer::init()
+			buzzer::init();
 			eeprom::init();
 			
 			// init software layer

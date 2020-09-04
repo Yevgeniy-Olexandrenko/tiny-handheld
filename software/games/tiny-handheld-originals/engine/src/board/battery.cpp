@@ -8,6 +8,9 @@ namespace th
 {
 	namespace battery
 	{
+		void init()   {}
+		void update() {}
+
 		// Vcc in millivolts
 		// Source: http://blog.unlimite.net/?p=25
 		uint16_t getVCC()

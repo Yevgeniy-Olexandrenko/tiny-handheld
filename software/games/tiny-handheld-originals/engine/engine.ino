@@ -228,45 +228,45 @@ uint8_t fps;
 void RenderBackground()
 {
 #if 1
-	th::render::TileFlags tileF = th::render::TF_EMPTY;
-	// tileF |= th::render::TF_TRANSPARENT;
-	// tileF |= th::render::TF_INVERSE;
-	th::render::renderBitmap(tileF, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
+	th::video::TileFlags tileF = th::video::TF_EMPTY;
+	// tileF |= th::video::TF_TRANSPARENT;
+	// tileF |= th::video::TF_INVERSE;
+	th::video::renderBitmap(tileF, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
 #else
 	for (uint8_t col = 0; col < 128; ++col)
 	{
-		bool isSolid = (th::render::m_page & 0x01) ^ (col >> 3 & 0x01);
-		th::render::m_renderBuffer[col] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::render::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
+		bool isSolid = (th::video::m_page & 0x01) ^ (col >> 3 & 0x01);
+		th::video::m_renderBuffer[col] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::video::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
 	}
 #endif
 }
 
 void RenderSprite(uint8_t x, uint8_t y)
 {
-	th::render::TileFlags tileF;
-	tileF |= th::render::TF_HAS_MASK;
-	// tileF |= th::render::TF_HAS_ODD_BM;
-	// tileF |= th::render::TF_TRANSPARENT;
-	// tileF |= th::render::TF_INVERSE;
+	th::video::TileFlags tileF;
+	tileF |= th::video::TF_HAS_MASK;
+	// tileF |= th::video::TF_HAS_ODD_BM;
+	// tileF |= th::video::TF_TRANSPARENT;
+	// tileF |= th::video::TF_INVERSE;
 
-	th::render::setTileBank(th::memory::Binary::InFLASH(tile_square));
+	th::video::setTileBank(th::memory::Binary::InFLASH(tile_square));
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
 		{
-			th::render::TileFlags flipY = (yy & 0x01) ? th::render::TF_EMPTY : th::render::TF_FLIP_Y;
-			th::render::TileFlags flipX = (xx & 0x01) ? th::render::TF_FLIP_X : th::render::TF_EMPTY;
-			th::render::renderTile(tileF | flipX | flipY, x + xx * 8, y + yy * 8, 0);
+			th::video::TileFlags flipY = (yy & 0x01) ? th::video::TF_EMPTY : th::video::TF_FLIP_Y;
+			th::video::TileFlags flipX = (xx & 0x01) ? th::video::TF_FLIP_X : th::video::TF_EMPTY;
+			th::video::renderTile(tileF | flipX | flipY, x + xx * 8, y + yy * 8, 0);
 		}
 	}
 }
 
 void RenderLogo(uint8_t x, uint8_t y)
 {
-	th::render::TileFlags tileF;
-	//tileF |= th::render::TF_TRANSPARENT;
-	//tileF |= th::render::TF_INVERSE;
-	th::render::renderBitmap(tileF, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
+	th::video::TileFlags tileF;
+	//tileF |= th::video::TF_TRANSPARENT;
+	//tileF |= th::video::TF_INVERSE;
+	th::video::renderBitmap(tileF, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
 }
 
 void RenderForeground()
@@ -279,36 +279,36 @@ void RenderForeground()
 
 void RenderSomeText(uint8_t x, uint8_t y)
 {
-	th::render::setFontData(th::assets::font6x8);
-	th::render::renderText(th::render::TileFlags::TF_EMPTY, x, y, "Some text!", 10);
+	th::video::setFontData(th::assets::font6x8);
+	th::video::renderText(th::video::TileFlags::TF_EMPTY, x, y, "Some text!", 10);
 }
 
 void RenderFPS()
 {
 	uint8_t f = fps;
-	th::render::setFontData(th::assets::font6x8);
+	th::video::setFontData(th::assets::font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
-		th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 - x, 0, '0' + (f % 10));
+		th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 - x, 0, '0' + (f % 10));
 		f /= 10;
 	}
 }
 
 void RenderBattery()
 {
-	uint8_t bat = th::mcu::getBatteryPercent();
-	th::render::setFontData(th::assets::font6x8);
+	uint8_t bat = th::battery::getPercent();
+	th::video::setFontData(th::assets::font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
-		th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
+		th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
 		bat /= 10;
 	}
-	th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 + 6, 64-8, '%');
+	th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 + 6, 64-8, '%');
 }
 
 void ClearBuffer()
 {
-	memset(th::render::m_renderBuffer, 0x00, 128);
+	memset(th::video::m_renderBuffer, 0x00, 128);
 }
 
 void RenderSequence()
@@ -325,7 +325,7 @@ void setup()
 	frame_count = 0;
 	fps = 0;
 
-	th::render::setRenderCallback(&RenderSequence);
+	th::video::setRenderCallback(&RenderSequence);
 }
 
 void loop()

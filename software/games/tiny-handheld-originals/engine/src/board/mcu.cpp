@@ -9,6 +9,9 @@ namespace th
 {
 	namespace mcu
 	{
+		void init()   {}
+		void update() {}
+
 		void wdtEnable(uint8_t mode, uint8_t prescaler)
 		{
 			uint8_t wdtr = mode | ((prescaler > 7) ? 0x20 | (prescaler - 8) : prescaler);

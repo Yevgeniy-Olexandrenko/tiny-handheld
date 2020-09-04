@@ -21,8 +21,8 @@ namespace th
 {
 	namespace mcu
 	{
-		void init()   DO_NOTHING
-		void update() DO_NOTHING
+		void init();
+		void update();
 
 		void wdtEnable(uint8_t mode, uint8_t prescaler);
 		void wdtDisable();
