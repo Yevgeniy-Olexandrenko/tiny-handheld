@@ -1,10 +1,10 @@
 #include "commons.h"
-#include "render.h"
+#include "video.h"
 #include "board/display.h"
 
 namespace th
 {
-	namespace render
+	namespace video
 	{
 		RenderCallback m_renderCallback;
 		uint8_t m_pageR;

@@ -4,7 +4,7 @@
 
 namespace th
 {
-	namespace render
+	namespace video
 	{
 		// rendering sequence type defs and rendering context
 		typedef void (*RenderCallback)();

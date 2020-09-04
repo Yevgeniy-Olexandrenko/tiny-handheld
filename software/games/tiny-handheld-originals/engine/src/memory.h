@@ -21,8 +21,8 @@ namespace th
 			uint8_t operator[](uint16_t index) const;
 
 		private:
-			uint16_t m_address;
-			uint8_t  m_storage;
+			const uint16_t m_address;
+			const uint8_t  m_storage;
 		};
 	}
 } 

@@ -21,14 +21,11 @@ namespace th
 {
 	namespace mcu
 	{
-		void init();
+		void init()   DO_NOTHING
+		void update() DO_NOTHING
 
 		void wdtEnable(uint8_t mode, uint8_t prescaler);
 		void wdtDisable();
 		void wdtReset();
-
-		uint16_t getVCC();
-		uint16_t getBatteryVoltage();
-		uint8_t  getBatteryPercent();
 	}
 }

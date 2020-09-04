@@ -1,12 +1,10 @@
-// Low level access to the hardware buttons
-
 #pragma once
 
 namespace th
 {
-	namespace input
+	namespace buttons
 	{
-		void init();
-		void update();
+		void init()   DO_NOTHING
+		void update() DO_NOTHING
 	}
 }

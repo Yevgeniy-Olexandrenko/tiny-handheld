@@ -30,24 +30,33 @@ namespace th
 		{
 			// init hardware layer
 			mcu::init();
+			battery::init();
+			buttons::init();
 			display::init();
+			buzzer::init()
 			eeprom::init();
-			input::init();
+			
+			// init software layer
+			video::init();
 			sound::init();
 
-			// init software layer
-			render::init();
-			setFPS(FPS_HIGH);
-
 			// init main programm
+			setFPS(FPS_HIGH);
 			setup();
 		}
 
 		void update()
 		{
-			input::update();
+			// update inputs
+			battery::update();
+			buttons::update();
+
+			// update main program
 			loop();
-			render::update();
+
+			// update outputs
+			video::update();
+			sound::update();
 			waitNextFrame();
 		}
 

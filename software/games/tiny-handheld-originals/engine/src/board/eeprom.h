@@ -6,7 +6,9 @@ namespace th
 {
 	namespace eeprom
 	{
-		void init();
+		void init()   DO_NOTHING
+		void update() DO_NOTHING
+
 		uint8_t readByte(const uint8_t * p);
 	}
 }

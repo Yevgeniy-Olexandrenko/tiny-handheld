@@ -11,5 +11,7 @@
 #include <util/delay.h>
 
 #define NULL 0
+#define DO_NOTHING {}
+
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
