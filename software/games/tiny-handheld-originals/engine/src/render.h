@@ -7,9 +7,7 @@ namespace th
 	namespace render
 	{
 		// rendering sequence type defs and rendering context
-		typedef void (*RenderLayerCallback)();
-		typedef const RenderLayerCallback * RenderSequence;
-
+		typedef void (*RenderCallback)();
 		extern uint8_t* m_renderBuffer;
 		extern uint8_t  m_page;
 		extern uint8_t  m_pageY;
@@ -49,7 +47,8 @@ namespace th
 		void init();
 		void update();
 
-		void setRenderSequence(RenderSequence renderSequence, uint8_t pageRange = 0x07);
+		void setDirectRenderCallback(RenderCallback renderCallback);
+		void setBufferRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
 		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth = 8);
 		void setFontData(const FontData &fontData);
 		

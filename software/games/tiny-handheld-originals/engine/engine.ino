@@ -279,13 +279,12 @@ void RenderFPS()
 	}
 }
 
-const th::render::RenderLayerCallback renderSequence[] PROGMEM =
+void RenderSequence()
 {
-	&RenderBackground,
-	&RenderForeground,
-	&RenderFPS,
-	NULL
-};
+	RenderBackground();
+	RenderForeground();
+	RenderFPS();
+}
 
 void setup()
 {
@@ -293,7 +292,7 @@ void setup()
 	frame_count = 0;
 	fps = 0;
 
-	th::render::setRenderSequence(renderSequence);
+	th::render::setBufferRenderCallback(&RenderSequence);
 }
 
 void loop()

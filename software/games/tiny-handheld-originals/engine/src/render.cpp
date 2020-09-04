@@ -9,7 +9,8 @@ namespace th
 {
 	namespace render
 	{
-		RenderSequence m_renderSequence;
+		RenderCallback m_directRenderCallback;
+		RenderCallback m_bufferRenderCallback;
 		uint8_t  m_pageR;
 
 		memory::Binary m_tileBank;
@@ -72,7 +73,7 @@ namespace th
 			return ti * ts;
 		}
 
-		static bool isRenderingActive()
+		static bool isBufferRenderActive()
 		{
 			return m_renderBuffer != NULL;
 		}
@@ -83,18 +84,23 @@ namespace th
 		{
 			m_oddFrame = false;
 			m_renderBuffer = NULL;
-			setRenderSequence(NULL);
+			setDirectRenderCallback(NULL);
+			setBufferRenderCallback(NULL);
 		}
 
 		void update()
 		{
-			if(m_renderSequence)
+			if (m_directRenderCallback)
+			{
+				m_directRenderCallback();
+			}
+			if (m_bufferRenderCallback)
 			{
 				uint8_t buf[129] = { 0x40 };
 				m_renderBuffer = &buf[0x01];
 
-				uint8_t pageF = m_pageR >> 0x4;
-				uint8_t pageL = m_pageR &  0xF;
+				uint8_t pageF = m_pageR >> 4;
+				uint8_t pageL = m_pageR & 0x0F;
 				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
@@ -102,21 +108,24 @@ namespace th
 		 			display::writeCmd(0x00);
 		 			display::writeCmd(0x10);
 
-					RenderSequence rs = m_renderSequence;
-					while (RenderLayerCallback rlc = pgm_read_word(rs++)) rlc();
+					m_bufferRenderCallback();
 					display::writeBuf(buf, sizeof(buf));
 				}
+				m_renderBuffer = NULL;
 			}
-
-			m_renderBuffer = NULL;
 			m_oddFrame ^= true;
 		}
 
-		void setRenderSequence(RenderSequence renderSequence, uint8_t pageRange)
+		void setDirectRenderCallback(RenderCallback renderCallback)
 		{
-			if (!isRenderingActive())
+			m_directRenderCallback = renderCallback;
+		}
+
+		void setBufferRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07)
+		{
+			if (!isBufferRenderActive())
 			{
-				m_renderSequence = renderSequence;
+				m_bufferRenderCallback = renderCallback;
 				m_pageR = pageRange & 0x77;
 			}
 		}

@@ -19,6 +19,9 @@
 #define FPS_LOW  WDT_TIMEOUT_32MS
 #define FPS_ULOW WDT_TIMEOUT_500MS
 
+// Configuration
+#define DISABLE_FPS_SYNC 1
+
 namespace th
 {
 	namespace engine
