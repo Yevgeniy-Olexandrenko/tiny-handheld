@@ -47,13 +47,16 @@ namespace th
 		void init();
 		void update();
 
-		void setDirectRenderCallback(RenderCallback renderCallback);
-		void setBufferRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
+		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
 		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth = 8);
 		void setFontData(const FontData &fontData);
 		
 		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta);
 		void renderChar(TileFlags tf, uint8_t x, uint8_t y, char ch);
 		void renderText(TileFlags tf, uint8_t x, uint8_t y, const char *text, uint8_t len);
+
+		void renderPattern(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
+		void renderBitmap(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary& bitmap);
+		
 	}
 }

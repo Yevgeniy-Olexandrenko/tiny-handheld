@@ -2,6 +2,7 @@
 
 #include "src/engine.h"
 #include "src/assets/fonts.h"
+#include "src/assets/logo.h"
 
 const uint8_t picture [] IN_FLASH =
  {
@@ -226,20 +227,28 @@ uint8_t fps;
 
 void RenderBackground()
 {
+#if 1
+	th::render::TileFlags tileF = th::render::TF_EMPTY;
+	// tileF |= th::render::TF_TRANSPARENT;
+	// tileF |= th::render::TF_INVERSE;
+	th::render::renderBitmap(tileF, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
+#else
 	for (uint8_t col = 0; col < 128; ++col)
 	{
-#if 0
-  	uint16_t index = th::render::m_page * 128 + col;
-  	th::render::m_renderBuffer[col] = pgm_read_byte(&picture[index]);
-#else
 		bool isSolid = (th::render::m_page & 0x01) ^ (col >> 3 & 0x01);
 		th::render::m_renderBuffer[col] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::render::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
-#endif
 	}
+#endif
 }
 
-void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
+void RenderSprite(uint8_t x, uint8_t y)
 {
+	th::render::TileFlags tileF;
+	tileF |= th::render::TF_HAS_MASK;
+	// tileF |= th::render::TF_HAS_ODD_BM;
+	// tileF |= th::render::TF_TRANSPARENT;
+	// tileF |= th::render::TF_INVERSE;
+
 	th::render::setTileBank(th::memory::Binary::InFLASH(tile_square));
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
@@ -252,20 +261,26 @@ void RenderSprite(uint8_t x, uint8_t y, th::render::TileFlags tileF)
 	}
 }
 
-void RenderForeground()
+void RenderLogo(uint8_t x, uint8_t y)
 {
 	th::render::TileFlags tileF;
-	tileF |= th::render::TF_HAS_MASK;
-	//	tileF |= th::render::TF_HAS_ODD_BM;
-	//	tileF |= th::render::TF_TRANSPARENT;
-	//	tileF |= th::render::TF_INVERSE;
+	//tileF |= th::render::TF_TRANSPARENT;
+	//tileF |= th::render::TF_INVERSE;
+	th::render::renderBitmap(tileF, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
+}
 
-	RenderSprite(x, y, tileF);
+void RenderForeground()
+{
+	RenderSprite(x, y);
+	RenderSomeText(128 - x, y + 4);
+	RenderSprite(x + 4, 64 - y);
+	RenderLogo(40, y);
+}
 
+void RenderSomeText(uint8_t x, uint8_t y)
+{
 	th::render::setFontData(th::assets::font6x8);
-	th::render::renderText(th::render::TileFlags::TF_EMPTY, 128 - x, y + 4, "Some text!", 10);
-
-	RenderSprite(x + 4, 64 - y, tileF);
+	th::render::renderText(th::render::TileFlags::TF_EMPTY, x, y, "Some text!", 10);
 }
 
 void RenderFPS()
@@ -291,12 +306,17 @@ void RenderBattery()
 	th::render::renderChar(th::render::TileFlags::TF_EMPTY, 12 + 6, 64-8, '%');
 }
 
+void ClearBuffer()
+{
+	memset(th::render::m_renderBuffer, 0x00, 128);
+}
+
 void RenderSequence()
 {
+  //ClearBuffer();
 	RenderBackground();
-//	RenderForeground();
-	RenderBattery();
-//	RenderFPS();
+	RenderForeground();
+	RenderFPS();
 }
 
 void setup()
@@ -305,7 +325,7 @@ void setup()
 	frame_count = 0;
 	fps = 0;
 
-	th::render::setBufferRenderCallback(&RenderSequence);
+	th::render::setRenderCallback(&RenderSequence);
 }
 
 void loop()

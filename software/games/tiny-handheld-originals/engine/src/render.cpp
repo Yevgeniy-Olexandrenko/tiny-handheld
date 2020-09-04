@@ -2,16 +2,12 @@
 #include "render.h"
 #include "board/display.h"
 
-#define IS_ON_THIS_PAGE(y) ((y) >> 3 == m_page)
-#define IS_ON_NEXT_PAGE(y) (m_pageY >= (y) && m_pageY < (y) + 8)
-
 namespace th
 {
 	namespace render
 	{
-		RenderCallback m_directRenderCallback;
-		RenderCallback m_bufferRenderCallback;
-		uint8_t  m_pageR;
+		RenderCallback m_renderCallback;
+		uint8_t m_pageR;
 
 		memory::Binary m_tileBank;
 		uint8_t  m_tileWidth;
@@ -24,6 +20,21 @@ namespace th
 		uint8_t  m_oddFrame;
 
 		////////////////////////////////////////////////////////////////////////
+
+		static bool isOnThisPage(uint8_t y)
+		{ 
+			return y >> 3 == m_page;
+		}
+
+		static bool isOnNextPage(uint8_t y)
+		{
+			return m_pageY >= y && m_pageY < y + 8;
+		}
+
+		static bool isNotVisibleForRender(uint8_t y, uint8_t h)
+		{
+			return m_pageY + 8 <= y || m_pageY >= y + h;
+		}
 
 		static uint8_t reverseBits(uint8_t b)
 		{
@@ -67,15 +78,10 @@ namespace th
 
 		static TileAddr getTileAddr(TileIndx ti, TileFlags tf)
 		{
-			uint8_t ts = m_tileWidth;
+			uint16_t ts = m_tileWidth;
 			if (tf & TF_HAS_MASK)   ts += m_tileWidth;
 			if (tf & TF_HAS_ODD_BM)	ts += m_tileWidth;
 			return ti * ts;
-		}
-
-		static bool isBufferRenderActive()
-		{
-			return m_renderBuffer != NULL;
 		}
 
 		////////////////////////////////////////////////////////////////////////
@@ -84,23 +90,23 @@ namespace th
 		{
 			m_oddFrame = false;
 			m_renderBuffer = NULL;
-			setDirectRenderCallback(NULL);
-			setBufferRenderCallback(NULL);
+			setRenderCallback(NULL);
 		}
 
 		void update()
 		{
-			if (m_directRenderCallback)
+			if (m_renderCallback)
 			{
-				m_directRenderCallback();
-			}
-			if (m_bufferRenderCallback)
-			{
+				// prepare rendering buffer
 				uint8_t buf[129] = { 0x40 };
 				m_renderBuffer = &buf[0x01];
 
+				// prepare rendering configuration 
 				uint8_t pageF = m_pageR >> 4;
 				uint8_t pageL = m_pageR & 0x0F;
+				RenderCallback renderCallback = m_renderCallback;
+
+				// do actual rendering page by page
 				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
@@ -108,7 +114,8 @@ namespace th
 		 			display::writeCmd(0x00);
 		 			display::writeCmd(0x10);
 
-					m_bufferRenderCallback();
+					// call same rendering pipeline for every page
+					renderCallback();
 					display::writeBuf(buf, sizeof(buf));
 				}
 				m_renderBuffer = NULL;
@@ -116,18 +123,12 @@ namespace th
 			m_oddFrame ^= true;
 		}
 
-		void setDirectRenderCallback(RenderCallback renderCallback)
+		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07)
 		{
-			m_directRenderCallback = renderCallback;
-		}
-
-		void setBufferRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07)
-		{
-			if (!isBufferRenderActive())
-			{
-				m_bufferRenderCallback = renderCallback;
-				m_pageR = pageRange & 0x77;
-			}
+			// Rendering configuration may be changed at the end of rendering
+			// pipeline. In this case it will be applied on the next frame.
+			m_renderCallback = renderCallback;
+			m_pageR = pageRange & 0x77;
 		}
 
 		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth)
@@ -147,7 +148,7 @@ namespace th
 		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta)
 		{
 			uint8_t bs, bi, tb, tm;
-			if (IS_ON_THIS_PAGE(y))
+			if (isOnThisPage(y))
 			{
 				// Case #1 : top tile half
 				bs = y & 0x07;
@@ -158,7 +159,7 @@ namespace th
 					m_renderBuffer[x] |= tb << bs;
 				}
 			}
-			else if (IS_ON_NEXT_PAGE(y))
+			else if (isOnNextPage(y))
 			{
 				// Case #2 : bottom tile half
 				bs = m_pageY - y;
@@ -181,7 +182,7 @@ namespace th
 		void renderText(TileFlags tf, uint8_t x, uint8_t y, const char *text, uint8_t len)
 		{
 			uint8_t i;
-			if (IS_ON_THIS_PAGE(y) || IS_ON_NEXT_PAGE(y))
+			if (isOnThisPage(y) || isOnNextPage(y))
 			{
 				tf &= TF_CONTROL_BITS;
 				tf |= m_fontFlags;
@@ -191,6 +192,25 @@ namespace th
 					renderTile(tf, x, y, getTileAddr(text[i] - m_asciiBase, tf));
 				}
 			}
+		}
+
+		// TODO: there must be a more efficient way
+		void renderBitmap(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary &bitmap)
+		{
+			uint8_t yh, ti;
+			if (isNotVisibleForRender(y, h)) return;
+
+			setTileBank(bitmap, w);
+			for (yh = y + h, ti = 0; y < yh; y += 8, ++ti)
+			{
+				renderTile(tf, x, y, getTileAddr(ti, tf));
+			}
+		}
+
+		void renderPattern(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti)
+		{
+			TileAddr ta = getTileAddr(ti, tf);
+			// TODO
 		}
 
 		////////////////////////////////////////////////////////////////////////
