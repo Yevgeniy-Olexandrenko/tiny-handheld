@@ -10,9 +10,9 @@ namespace th
 		uint8_t m_pageR;
 
 		memory::Binary m_tileBank;
-		uint8_t  m_tileWidth;
-		uint8_t  m_fontFlags;
-		uint8_t  m_asciiBase;
+		TileFormat m_tileFormat;
+		uint8_t    m_tileWidth;
+		uint8_t    m_asciiBase;
 
 		uint8_t* m_renderBuffer;
 		uint8_t  m_page;
@@ -44,44 +44,60 @@ namespace th
 			return b;
 		}
 
-		static void fetchTileData(TileAddr ta, TileFlags tf, uint8_t bi, uint8_t &tb, uint8_t &tm)
+		static void fetchTileData(TileAddr ta, RenderFlags rf, uint8_t bi, uint8_t &tb, uint8_t &tm)
 		{
-			if (tf & TF_FLIP_X)
-				ta += m_tileWidth - 1 - bi;
-			else
-				ta += bi;
+			ta += (rf & RF_FLIP_X) ? m_tileWidth - 1 - bi : bi;
 
-			tb = m_tileBank[ta];
+			switch (m_tileFormat & TF_BITS_FOR_TYPE)
+			{
+			default:
+				tb = m_tileBank[ta];
+				tm = (rf & RF_TRANSPARENT) ? tb : 0xFF;
+				break;
 
-			if (tf & TF_HAS_MASK)
-				tm = m_tileBank[ta += m_tileWidth];
-			else if (tf & TF_TRANSPARENT)
-				tm = tb;
-			else
-				tm = 0xFF;
+			case TF_BM_MASKBM:
+				tb = m_tileBank[ta];
+				tm = (rf & RF_TRANSPARENT) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				break;
 
-			if ((tf & TF_HAS_ODD_BM) && m_oddFrame)
-				tb = m_tileBank[ta + m_tileWidth];
+			case TF_BM_ODDBM:
+				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth] : m_tileBank[ta];
+				tm = (rf & RF_TRANSPARENT) ? tb : 0xFF;
+				break;
 
-			if (tf & TF_FLIP_Y)
+			case TF_BM_MASKBM_ODDBM:
+				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth + m_tileWidth] : m_tileBank[ta];
+				tm = (rf & RF_TRANSPARENT) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				break;
+			}
+
+			if (rf & RF_FLIP_Y)
 			{
 				tb = reverseBits(tb);
 				tm = reverseBits(tm);
 			}
 
-			if (tf & TF_INVERSE)
+			if (rf & RF_INVERSE)
 			{
 				tb = ~tb;
 				tb &= tm;
 			}
 		}
 
-		static TileAddr getTileAddr(TileIndx ti, TileFlags tf)
+		static TileAddr getTileAddr(TileIndx ti)
 		{
-			uint16_t ts = m_tileWidth;
-			if (tf & TF_HAS_MASK)   ts += m_tileWidth;
-			if (tf & TF_HAS_ODD_BM)	ts += m_tileWidth;
-			return ti * ts;
+			switch (m_tileFormat & TF_BITS_FOR_TYPE)
+			{
+			default:
+				return ti * m_tileWidth;
+
+			case TF_BM_MASKBM:
+			case TF_BM_ODDBM:
+				return ti * 2 * m_tileWidth;
+
+			case TF_BM_MASKBM_ODDBM:
+				return ti * 3 * m_tileWidth;
+			}
 		}
 
 		////////////////////////////////////////////////////////////////////////
@@ -131,30 +147,37 @@ namespace th
 			m_pageR = pageRange & 0x77;
 		}
 
-		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth)
+		void setTileBank(const memory::Binary& tileBank, TileFormat tileFormat, uint8_t tileWidth)
 		{
-			m_tileBank  = tileBank;
-			m_tileWidth = tileWidth;
+			m_tileBank   = tileBank;
+			m_tileFormat = tileFormat;
+			m_tileWidth  = tileFormat & TF_BITS_FOR_WIDTH;
+
+			if (tileWidth)
+				// override tile width with custom value
+				m_tileWidth = tileWidth;
+			else if (!m_tileWidth)
+				// if tile width is still not set, use default value 
+				m_tileWidth = 8;
 		}
 
 		void setFontData(const FontData &fontData)
 		{
-			m_tileBank  = memory::Binary::InFLASH(fontData.tileBank); // TODO !!!
-			m_fontFlags = fontData.tileFlags & (TF_CONFIG_BITS);
-			m_tileWidth = fontData.tileWidth;
+			setTileBank(memory::Binary::InFLASH(fontData.tileBank), fontData.tileFormat);
 			m_asciiBase = fontData.asciiBase;
 		}
 
-		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta)
+		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti)
 		{
-			uint8_t bs, bi, tb, tm;
+			uint8_t bs, bi, tb, tm; TileAddr ta;
 			if (isOnThisPage(y))
 			{
 				// Case #1 : top tile half
 				bs = y & 0x07;
+				ta = getTileAddr(ti);
 				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
 				{
-					fetchTileData(ta, tf, bi, tb, tm);
+					fetchTileData(ta, rf, bi, tb, tm);
 					m_renderBuffer[x] &= ~(tm << bs);
 					m_renderBuffer[x] |= tb << bs;
 				}
@@ -163,55 +186,62 @@ namespace th
 			{
 				// Case #2 : bottom tile half
 				bs = m_pageY - y;
+				ta = getTileAddr(ti);
 				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
 				{
-					fetchTileData(ta, tf, bi, tb, tm);
+					fetchTileData(ta, rf, bi, tb, tm);
 					m_renderBuffer[x] &= ~(tm >> bs);
 					m_renderBuffer[x] |= tb >> bs;
 				}
 			}
 		}
 
-		void renderChar(TileFlags tf, uint8_t x, uint8_t y, char ch)
+		void renderChar(RenderFlags rf, uint8_t x, uint8_t y, char ch)
 		{
-			tf &= TF_CONTROL_BITS;
-			tf |= m_fontFlags;
-			renderTile(tf, x, y, getTileAddr(ch - m_asciiBase, tf));
+			renderTile(rf, x, y, ch - m_asciiBase);
 		}
 
-		void renderText(TileFlags tf, uint8_t x, uint8_t y, const char *text, uint8_t len)
+		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len)
 		{
 			uint8_t i;
 			if (isOnThisPage(y) || isOnNextPage(y))
 			{
-				tf &= TF_CONTROL_BITS;
-				tf |= m_fontFlags;
-
 				for (i = 0; i < len && text[i]; ++i, x += m_tileWidth)
 				{
-					renderTile(tf, x, y, getTileAddr(text[i] - m_asciiBase, tf));
+					renderTile(rf, x, y, text[i] - m_asciiBase);
 				}
 			}
 		}
 
+		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti)
+		{
+			// TODO
+		}
+
 		// TODO: there must be a more efficient way
-		void renderBitmap(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary &bitmap)
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary &bitmap)
 		{
 			uint8_t yh, ti;
 			if (isNotVisibleForRender(y, h)) return;
 
-			setTileBank(bitmap, w);
-			for (yh = y + h, ti = 0; y < yh; y += 8, ++ti)
+			setTileBank(bitmap, TF_BM, w);
+			if (rf & RF_FLIP_Y)
 			{
-				renderTile(tf, x, y, getTileAddr(ti, tf));
+				for (yh = y + h, ti = 0; yh > y; yh -= 8, ++ti)
+				{
+					renderTile(rf, x, yh - 8, ti);
+				}
+			}
+			else
+			{
+				for (yh = y + h, ti = 0; y < yh; y += 8, ++ti)
+				{
+					renderTile(rf, x, y, ti);
+				}
 			}
 		}
 
-		void renderPattern(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti)
-		{
-			TileAddr ta = getTileAddr(ti, tf);
-			// TODO
-		}
+		
 
 		////////////////////////////////////////////////////////////////////////
 

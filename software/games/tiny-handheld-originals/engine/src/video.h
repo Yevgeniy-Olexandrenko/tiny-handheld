@@ -17,30 +17,31 @@ namespace th
 		typedef uint16_t TileAddr;
 		typedef uint8_t  TileIndx;
 
-		// tile data type defs
-		enum TileFlags : uint8_t
+		enum TileFormat : uint8_t
 		{
-			TF_EMPTY        = 0x00,
-			TF_CONFIG_BITS  = 0x0F,
-			TF_CONTROL_BITS = 0xF0,
+			TF_BM              = 0x00,
+			TF_BM_MASKBM       = 0x40,
+			TF_BM_ODDBM        = 0x80,
+			TF_BM_MASKBM_ODDBM = 0xC0,
 
-			TF_HAS_MASK     = 0x08, // tile has additional bitmap for masking opaque pixels
-			TF_HAS_ODD_BM   = 0x04, // tile has additional bitmap for odd rendering frames
-			TF_TRANSPARENT  = 0x02,
-			TF_CONFIG_BIT0  = 0x01,
-			
-			TF_FLIP_X       = 0x80,
-			TF_FLIP_Y       = 0x40,
-			TF_INVERSE      = 0x20,
-			TF_CONTROL_BIT4 = 0x10
+			TF_BITS_FOR_TYPE   = 0xC0,
+			TF_BITS_FOR_WIDTH  = 0x3F
+		};
+
+		enum RenderFlags : uint8_t
+		{
+			RF_FLIP_X       = 0x80,
+		 	RF_FLIP_Y       = 0x40,
+			RF_TRANSPARENT  = 0x20,
+			RF_INVERSE      = 0x10,
+			RF_EMPTY        = 0x00
 		};
 
 		// font data type defs
 		struct FontData
 		{
 			const uint8_t* tileBank;
-			TileFlags tileFlags;
-			uint8_t tileWidth;
+			TileFormat tileFormat;
 			uint8_t asciiBase;
 		};
 
@@ -48,15 +49,15 @@ namespace th
 		void update();
 
 		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
-		void setTileBank(const memory::Binary& tileBank, uint8_t tileWidth = 8);
+		void setTileBank(const memory::Binary& tileBank, TileFormat tileFormat, uint8_t tileWidth = 0);
 		void setFontData(const FontData &fontData);
 		
-		void renderTile(TileFlags tf, uint8_t x, uint8_t y, TileAddr ta);
-		void renderChar(TileFlags tf, uint8_t x, uint8_t y, char ch);
-		void renderText(TileFlags tf, uint8_t x, uint8_t y, const char *text, uint8_t len);
+		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti);
+		void renderChar(RenderFlags rf, uint8_t x, uint8_t y, char ch);
+		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len);
 
-		void renderPattern(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
-		void renderBitmap(TileFlags tf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary& bitmap);
+		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary& bitmap);
 		
 	}
 }

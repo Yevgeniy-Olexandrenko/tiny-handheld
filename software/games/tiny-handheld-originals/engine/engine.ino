@@ -228,10 +228,12 @@ uint8_t fps;
 void RenderBackground()
 {
 #if 1
-	th::video::TileFlags tileF = th::video::TF_EMPTY;
-	// tileF |= th::video::TF_TRANSPARENT;
-	// tileF |= th::video::TF_INVERSE;
-	th::video::renderBitmap(tileF, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
+	th::video::RenderFlags rf = th::video::RF_EMPTY;
+  //rf |= th::video::RF_TRANSPARENT;
+  rf |= th::video::RF_INVERSE;
+  //rf |= th::video::RF_FLIP_Y;
+  //rf |= th::video::RF_FLIP_X;
+	th::video::renderBitmap(rf, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
 #else
 	for (uint8_t col = 0; col < 128; ++col)
 	{
@@ -243,30 +245,28 @@ void RenderBackground()
 
 void RenderSprite(uint8_t x, uint8_t y)
 {
-	th::video::TileFlags tileF;
-	tileF |= th::video::TF_HAS_MASK;
-	// tileF |= th::video::TF_HAS_ODD_BM;
-	// tileF |= th::video::TF_TRANSPARENT;
-	// tileF |= th::video::TF_INVERSE;
+	th::video::RenderFlags rf = th::video::RF_EMPTY;
+	rf |= th::video::RF_TRANSPARENT;
+	// rf |= th::video::RF_INVERSE;
 
-	th::video::setTileBank(th::memory::Binary::InFLASH(tile_square));
+	th::video::setTileBank(th::memory::Binary::InFLASH(tile_square), th::video::TF_BM_MASKBM);
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
 		{
-			th::video::TileFlags flipY = (yy & 0x01) ? th::video::TF_EMPTY : th::video::TF_FLIP_Y;
-			th::video::TileFlags flipX = (xx & 0x01) ? th::video::TF_FLIP_X : th::video::TF_EMPTY;
-			th::video::renderTile(tileF | flipX | flipY, x + xx * 8, y + yy * 8, 0);
+			th::video::RenderFlags flipY = (yy & 0x01) ? th::video::RF_EMPTY  : th::video::RF_FLIP_Y;
+			th::video::RenderFlags flipX = (xx & 0x01) ? th::video::RF_FLIP_X : th::video::RF_EMPTY;
+			th::video::renderTile(rf | flipX | flipY, x + xx * 8, y + yy * 8, 0);
 		}
 	}
 }
 
 void RenderLogo(uint8_t x, uint8_t y)
 {
-	th::video::TileFlags tileF;
-	//tileF |= th::video::TF_TRANSPARENT;
-	//tileF |= th::video::TF_INVERSE;
-	th::video::renderBitmap(tileF, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
+	th::video::RenderFlags rf = th::video::RF_EMPTY;
+	//rf |= th::video::RF_TRANSPARENT;
+	//rf |= th::video::RF_INVERSE;
+	th::video::renderBitmap(rf, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
 }
 
 void RenderForeground()
@@ -280,7 +280,7 @@ void RenderForeground()
 void RenderSomeText(uint8_t x, uint8_t y)
 {
 	th::video::setFontData(th::assets::font6x8);
-	th::video::renderText(th::video::TileFlags::TF_EMPTY, x, y, "Some text!", 10);
+	th::video::renderText(th::video::RF_EMPTY, x, y, "Some text!", 10);
 }
 
 void RenderFPS()
@@ -289,7 +289,7 @@ void RenderFPS()
 	th::video::setFontData(th::assets::font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
-		th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 - x, 0, '0' + (f % 10));
+		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 0, '0' + (f % 10));
 		f /= 10;
 	}
 }
@@ -300,10 +300,10 @@ void RenderBattery()
 	th::video::setFontData(th::assets::font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
-		th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
+		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
 		bat /= 10;
 	}
-	th::video::renderChar(th::video::TileFlags::TF_EMPTY, 12 + 6, 64-8, '%');
+	th::video::renderChar(th::video::RF_EMPTY, 12 + 6, 64-8, '%');
 }
 
 void ClearBuffer()
@@ -313,7 +313,7 @@ void ClearBuffer()
 
 void RenderSequence()
 {
-  //ClearBuffer();
+//  ClearBuffer();
 	RenderBackground();
 	RenderForeground();
 	RenderFPS();
