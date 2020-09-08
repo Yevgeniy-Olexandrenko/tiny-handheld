@@ -3,13 +3,13 @@
 #include "commons.h"
 #include "board/eeprom.h"
 
-#define DISABLE_EXT_EEPROM 0
+#define DISABLE_EXT_EEPROM 1
 
 namespace th
 {
 	namespace memory
 	{
-		enum class Type : uint8_t
+		enum Type : uint8_t
 		{
 			NONE,
 			MCU_FLASH,
@@ -22,23 +22,19 @@ namespace th
 		#endif			
 		};
 
-		template <Type M, typename T>
-		struct Wrapper;
+		template <Type M, typename T> struct Wrapper;
 
-		template <bool V, typename T, typename F>
-		struct select
+		template <bool V, typename T, typename F> struct select
 		{
 			typedef T type;
 		};
 
-		template <typename T, typename F>
-		struct select<false, T, F>
+		template <typename T, typename F> struct select<false, T, F>
 		{
 			typedef F type;
 		};
 
-		template <Type M, typename T>
-		struct MultiByte
+		template <Type M, typename T> struct MultiByte
 		{
 			T Read(const Wrapper<Type::MCU_FLASH, T> *data)
 			{
@@ -55,8 +51,7 @@ namespace th
 			}
 		};
 
-		template <Type M, typename T>
-		struct SingleByte
+		template <Type M, typename T> struct SingleByte
 		{
 			T Read(const Wrapper<Type::MCU_FLASH, T> *data)
 			{
@@ -69,8 +64,7 @@ namespace th
 			}
 		};
 
-		template <Type M, typename T>
-		struct Wrapper
+		template <Type M, typename T> struct Wrapper
 		{
 			typedef typename select<sizeof(T) == 1, SingleByte<M, T>, MultiByte<M, T>>::type Reader;
 
@@ -86,7 +80,6 @@ namespace th
 
 			T t;
 		};
-
 	}
 } 
 

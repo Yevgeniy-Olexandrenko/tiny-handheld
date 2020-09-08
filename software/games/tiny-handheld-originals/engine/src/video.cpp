@@ -9,10 +9,9 @@ namespace th
 		RenderCallback m_renderCallback;
 		uint8_t m_pageR;
 
-		TileBank   m_tileBank;
-		TileFormat m_tileFormat;
-		uint8_t    m_tileWidth;
-		uint8_t    m_asciiBase;
+		TileBank m_tileBank;
+		uint8_t  m_tileWidth;
+		uint8_t  m_asciiBase;
 
 		uint8_t* m_renderBuffer;
 		uint8_t  m_page;
@@ -53,7 +52,7 @@ namespace th
 		{
 			ta += (rf & RF_FLIP_X) ? m_tileWidth - 1 - bi : bi;
 
-			switch (m_tileFormat & TF_BITS_FOR_TYPE)
+			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
 				tb = m_tileBank[ta];
@@ -91,7 +90,7 @@ namespace th
 
 		static TileAddr getTileAddr(TileIndx ti)
 		{
-			switch (m_tileFormat & TF_BITS_FOR_TYPE)
+			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
 				return ti * m_tileWidth;
@@ -152,11 +151,10 @@ namespace th
 			m_pageR = pageRange & 0x77;
 		}
 
-		void setTileBank(const TileBank& tileBank, TileFormat tileFormat, uint8_t tileWidth)
+		void setTileBank(const TileBank& tileBank, uint8_t tileWidth)
 		{
-			m_tileBank   = tileBank;
-			m_tileFormat = tileFormat;
-			m_tileWidth  = tileFormat & TF_BITS_FOR_WIDTH;
+			m_tileBank  = tileBank;
+			m_tileWidth = tileBank.m_format & TF_BITS_FOR_WIDTH;
 
 			if (tileWidth)
 				// override tile width with custom value
@@ -166,10 +164,10 @@ namespace th
 				m_tileWidth = 8;
 		}
 
-		void setFontData(const FontData &fontData)
+		void setFontBank(const FontBank &fontBank)
 		{
-			setTileBank(fontData.tileBank, fontData.tileFormat);
-			m_asciiBase = fontData.asciiBase;
+			setTileBank(fontBank);
+			m_asciiBase = fontBank.m_asciiBase;
 		}
 
 		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti)
@@ -229,7 +227,7 @@ namespace th
 			uint8_t yh, ti;
 			if (isNotVisibleForRender(y, h)) return;
 
-			setTileBank(bitmap, TF_BM, w);
+			setTileBank(bitmap, w);
 			if (rf & RF_FLIP_Y)
 			{
 				for (yh = y + h, ti = 0; yh > y; yh -= 8, ++ti)
@@ -245,9 +243,6 @@ namespace th
 				}
 			}
 		}
-
-		
-		
 
 		////////////////////////////////////////////////////////////////////////
 

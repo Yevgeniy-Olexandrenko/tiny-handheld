@@ -72,6 +72,8 @@ uint8_f picture [] IN_FLASH =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
+th::video::TileBank tb_picture(picture, th::video::TF_BM);
+
 uint8_s tile_square[] IN_STORAGE =
 {
   // bits A
@@ -121,7 +123,7 @@ void RenderBackground()
   //rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
-	th::video::renderBitmap(rf, 0, 0, 128, 64, picture);
+	th::video::renderBitmap(rf, 0, 0, 128, 64, tb_picture);
 #else
 	for (uint8_t col = 0; col < 128; ++col)
 	{
@@ -134,10 +136,11 @@ void RenderBackground()
 void RenderSprite(uint8_t x, uint8_t y)
 {
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
-	//rf |= th::video::RF_TRANSPARENT;
+	rf |= th::video::RF_TRANSPARENT;
 	//rf |= th::video::RF_INVERSE;
 
-	th::video::setTileBank(tile_square, th::video::TF_BM_MASKBM);
+	th::video::setTileBank(th::video::TileBank(tile_square, th::video::TF_BM_MASKBM));
+ 
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
@@ -154,7 +157,7 @@ void RenderLogo(uint8_t x, uint8_t y)
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
 	//rf |= th::video::RF_TRANSPARENT;
 	//rf |= th::video::RF_INVERSE;
-	th::video::renderBitmap(rf, x, y, 48, 16, th::assets::logo);
+	th::video::renderBitmap(rf, x, y, 48, 16, th::assets::tb_logo);
 }
 
 void RenderForeground()
@@ -167,14 +170,14 @@ void RenderForeground()
 
 void RenderSomeText(uint8_t x, uint8_t y)
 {
-	th::video::setFontData(th::assets::font6x8);
+	th::video::setFontBank(th::assets::fb_font6x8);
 	th::video::renderText(th::video::RF_EMPTY, x, y, "Some text!", 10);
 }
 
 void RenderFPS()
 {
 	uint8_t f = fps;
-	th::video::setFontData(th::assets::font6x8);
+	th::video::setFontBank(th::assets::fb_font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
 		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 0, '0' + (f % 10));
@@ -185,7 +188,7 @@ void RenderFPS()
 void RenderBattery()
 {
 	uint8_t bat = th::battery::getPercent();
-	th::video::setFontData(th::assets::font6x8);
+	th::video::setFontBank(th::assets::fb_font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
 		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));

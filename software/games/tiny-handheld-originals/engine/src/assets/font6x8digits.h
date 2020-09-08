@@ -6,7 +6,7 @@ namespace th
 {
 	namespace assets
 	{
-		BINARY_IN_STORAGE(tile_bank_font6x8_digits) = 
+		BINARY_IN_STORAGE(font6x8_digits) = 
 		{
 			0x00, 0x3E, 0x51, 0x49, 0x45, 0x3E, // 0
 			0x00, 0x00, 0x42, 0x7F, 0x40, 0x00, // 1

@@ -10,8 +10,8 @@ namespace th
 {
 	namespace assets
 	{
-		const video::FontData font6x8 = { tile_bank_font6x8, video::TileFormat::TF_BM | 6, ' ' };
-		const video::FontData font6x8caps = { tile_bank_font6x8_caps, video::TileFormat::TF_BM | 6, ' ' };
-		const video::FontData font6x8digits = { tile_bank_font6x8_digits, video::TileFormat::TF_BM | 6, '0' };
+		const video::FontBank fb_font6x8 = { font6x8, video::TileFormat::TF_BM | 6, ' ' };
+		const video::FontBank fb_font6x8caps = { font6x8_caps, video::TileFormat::TF_BM | 6, ' ' };
+		const video::FontBank fb_font6x8digits = { font6x8_digits, video::TileFormat::TF_BM | 6, '0' };
 	}
 }
