@@ -9,7 +9,7 @@ namespace th
 		RenderCallback m_renderCallback;
 		uint8_t m_pageR;
 
-		memory::Binary m_tileBank;
+		TileBank   m_tileBank;
 		TileFormat m_tileFormat;
 		uint8_t    m_tileWidth;
 		uint8_t    m_asciiBase;
@@ -147,9 +147,9 @@ namespace th
 			m_pageR = pageRange & 0x77;
 		}
 
-		void setTileBank(const memory::Binary& tileBank, TileFormat tileFormat, uint8_t tileWidth)
+		void setTileBank(uint8_s* tileBank, TileFormat tileFormat, uint8_t tileWidth)
 		{
-			m_tileBank   = tileBank;
+			m_tileBank   = TileBank(tileBank);
 			m_tileFormat = tileFormat;
 			m_tileWidth  = tileFormat & TF_BITS_FOR_WIDTH;
 
@@ -163,7 +163,7 @@ namespace th
 
 		void setFontData(const FontData &fontData)
 		{
-			setTileBank(memory::Binary::InFLASH(fontData.tileBank), fontData.tileFormat);
+			setTileBank(fontData.tileBank, fontData.tileFormat);
 			m_asciiBase = fontData.asciiBase;
 		}
 
@@ -219,7 +219,7 @@ namespace th
 		}
 
 		// TODO: there must be a more efficient way
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary &bitmap)
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_s *bitmap)
 		{
 			uint8_t yh, ti;
 			if (isNotVisibleForRender(y, h)) return;

@@ -8,10 +8,15 @@ namespace th
 		void init()   {}
 		void update() {}
 
-		uint8_t readByte(const uint8_t * p)
+		uint8_t readByte(const void *p)
 		{
 			// TODO
-			return 0x00;
+			return 0xAA;
+		}
+
+		void readBlock(void *dest, const void *src, size_t n)
+		{
+			// TODO
 		}
 	}
 }

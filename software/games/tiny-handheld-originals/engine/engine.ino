@@ -4,7 +4,7 @@
 #include "src/assets/fonts.h"
 #include "src/assets/logo.h"
 
-const uint8_t picture [] IN_FLASH =
+uint8_s picture [] IN_STORAGE =
  {
 	0x00,0x03,0x05,0x09,0x11,0xFF,0x11,0x89,0x05,0xC3,0x00,0xE0,0x00,0xF0,0x00,0xF8,
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x44,0x28,0xFF,0x11,0xAA,0x44,0x00,0x00,0x00,
@@ -72,88 +72,7 @@ const uint8_t picture [] IN_FLASH =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
-const uint8_t tile_empty[] PROGMEM =
-{
-	// bits A
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	// mask
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	// bits B
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-	0b00000000,
-};
-
-const uint8_t tile_4x8[] PROGMEM =
-{
-  // bits A
-  0b11111111,
-  0b10000001,
-  0b10000001,
-  0b11111111,
-  // mask
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  // bits B
-  0b11111111,
-  0b10011001,
-  0b10011001,
-  0b11111111,
-};
-
-const uint8_t tile_triangle[] PROGMEM =
-{
-	// bits A
-	0b00000000,
-	0b01000000,
-	0b01100000,
-	0b01010000,
-	0b01001000,
-	0b01000100,
-	0b01111110,
-	0b00000000,
-	// mask
-	0b10000000,
-	0b11000000,
-	0b11100000,
-	0b11110000,
-	0b11111000,
-	0b11111100,
-	0b11111110,
-	0b11111111,
-	// bits B
-	0b00000000,
-	0b01000000,
-	0b01100000,
-	0b01110000,
-	0b01111000,
-	0b01111100,
-	0b01111110,
-	0b00000000,
-};
-
-const uint8_t tile_square[] IN_FLASH =
+uint8_s tile_square[] IN_STORAGE =
 {
   // bits A
   0b00000000,
@@ -182,37 +101,6 @@ const uint8_t tile_square[] IN_FLASH =
   0b01000010,
   0b01111110,
   0b00000000,
-};
-
-const uint8_t tile_box_quater[] PROGMEM =
-{
-  // bits A
-  0b00000000,
-  0b01111111,
-  0b01000000,
-  0b01010101,
-  0b01001011,
-  0b01010101,
-  0b01001011,
-  0b01011111,
-  // mask
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  0b11111111,
-  // bits B
-  0b00000000,
-  0b01111111,
-  0b01000000,
-  0b01001011,
-  0b01010101,
-  0b01001011,
-  0b01010101,
-  0b01011111,
 };
 
 
@@ -233,7 +121,7 @@ void RenderBackground()
   rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
-	th::video::renderBitmap(rf, 0, 0, 128, 64, th::memory::Binary::InFLASH(picture));
+	th::video::renderBitmap(rf, 0, 0, 128, 64, picture);
 #else
 	for (uint8_t col = 0; col < 128; ++col)
 	{
@@ -249,7 +137,7 @@ void RenderSprite(uint8_t x, uint8_t y)
 	rf |= th::video::RF_TRANSPARENT;
 	// rf |= th::video::RF_INVERSE;
 
-	th::video::setTileBank(th::memory::Binary::InFLASH(tile_square), th::video::TF_BM_MASKBM);
+	th::video::setTileBank(tile_square, th::video::TF_BM_MASKBM);
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
 		for (uint8_t xx = 0; xx < s; ++xx)
@@ -266,7 +154,7 @@ void RenderLogo(uint8_t x, uint8_t y)
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
 	//rf |= th::video::RF_TRANSPARENT;
 	//rf |= th::video::RF_INVERSE;
-	th::video::renderBitmap(rf, x, y, 48, 16, th::memory::Binary::InFLASH(th::assets::logo));
+	th::video::renderBitmap(rf, x, y, 48, 16, th::assets::logo);
 }
 
 void RenderForeground()

@@ -17,6 +17,23 @@ namespace th
 		typedef uint16_t TileAddr;
 		typedef uint8_t  TileIndx;
 
+		struct TileBank
+		{
+			uint8_f *m_faddr;
+			uint8_s *m_saddr;
+
+			TileBank() : m_faddr(NULL), m_saddr(NULL) {}
+			//TileBank(uint8_f *addr) : m_faddr(addr), m_saddr(NULL) {}
+			TileBank(uint8_s *addr) : m_faddr(NULL), m_saddr(addr) {}
+
+			uint8_t operator[](TileAddr tileAddr) const
+			{
+				return (m_saddr ? m_saddr[tileAddr] : (m_faddr ? m_faddr[tileAddr] : 0xFF));
+			}
+		};
+
+		
+
 		enum TileFormat : uint8_t
 		{
 			TF_BM              = 0x00,
@@ -40,7 +57,7 @@ namespace th
 		// font data type defs
 		struct FontData
 		{
-			const uint8_t* tileBank;
+			uint8_s *tileBank;
 			TileFormat tileFormat;
 			uint8_t asciiBase;
 		};
@@ -49,7 +66,7 @@ namespace th
 		void update();
 
 		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
-		void setTileBank(const memory::Binary& tileBank, TileFormat tileFormat, uint8_t tileWidth = 0);
+		void setTileBank(uint8_s *tileBank, TileFormat tileFormat, uint8_t tileWidth = 0);
 		void setFontData(const FontData &fontData);
 		
 		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti);
@@ -57,7 +74,7 @@ namespace th
 		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len);
 
 		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const memory::Binary& bitmap);
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_s *bitmap);
 		
 	}
 }

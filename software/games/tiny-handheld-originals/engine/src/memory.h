@@ -1,28 +1,118 @@
 #pragma once
 
+#include "commons.h"
+#include "board/eeprom.h"
+
+enum class Storage
+{
+	MCU_FLASH, EXT_EEPROM, FOR_DATA = MCU_FLASH
+};
+
+//	TODO:
 #define IN_FLASH     PROGMEM
-#define IN_IntEEPROM EEMEM
-#define IN_ExtEEPROM EEMEM
+#define IN_STORAGE   PROGMEM
 
 namespace th
 {
 	namespace memory
 	{
-		class Binary final
+		template <Storage S, typename T>
+		struct Wrapper;
+
+		template <bool V, typename T, typename F>
+		struct select
 		{
-			Binary(const uint8_t* data, uint8_t storage);
-
-		public:
-			static Binary InFLASH(const uint8_t* data);
-			static Binary InIntEEPROM(const uint8_t* data);
-			static Binary InExtEEPROM(const uint8_t* data);
-
-			Binary();
-			uint8_t operator[](uint16_t index) const;
-
-		private:
-			uint16_t m_address;
-			uint8_t  m_storage;
+			typedef T type;
 		};
+
+		template <typename T, typename F>
+		struct select<false, T, F>
+		{
+			typedef F type;
+		};
+
+		template <Storage S, typename T>
+		struct MultiByte
+		{
+			T Read(const Wrapper<Storage::MCU_FLASH, T> *data)
+			{
+				T ret;
+				memcpy_P(&ret, data, sizeof(T));
+				return ret;
+			}
+
+			T Read(const Wrapper<Storage::EXT_EEPROM, T> *data)
+			{
+				T ret;
+				eeprom::readBlock(&ret, data, sizeof(T));
+				return ret;
+			}
+		};
+
+		template <Storage S, typename T>
+		struct SingleByte
+		{
+			T Read(const Wrapper<Storage::MCU_FLASH, T> *data)
+			{
+				return pgm_read_byte(data);
+			}
+
+			T Read(const Wrapper<Storage::EXT_EEPROM, T> *data)
+			{
+				return eeprom::readByte(data);
+			}
+		};
+
+		template <Storage S, typename T>
+		struct Wrapper
+		{
+			typedef typename select<sizeof(T) == 1, SingleByte<S, T>, MultiByte<S, T>>::type Reader;
+
+			operator const T() const
+			{
+				return Reader().Read(this);
+			}
+
+			bool operator==(const T &in)
+			{
+				return Reader().Read(this) == in;
+			}
+
+			T t;
+		};
+
 	}
 } 
+
+
+// Flash memory data types
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, int8_t>   int8_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, uint8_t>  uint8_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, int16_t>  int16_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, uint16_t> uint16_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, int32_t>  int32_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, uint32_t> uint32_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, int64_t>  int64_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, uint64_t> uint64_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, bool>     bool_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, float>    float_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, double>   double_f;
+typedef const th::memory::Wrapper<Storage::MCU_FLASH, size_t>   size_f;
+
+// Data storage data types
+typedef const th::memory::Wrapper<Storage::FOR_DATA, int8_t>   int8_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, uint8_t>  uint8_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, int16_t>  int16_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, uint16_t> uint16_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, int32_t>  int32_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, uint32_t> uint32_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, int64_t>  int64_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, uint64_t> uint64_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, bool>     bool_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, float>    float_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, double>   double_s;
+typedef const th::memory::Wrapper<Storage::FOR_DATA, size_t>   size_s;
+
+// Data definition helpers
+#define BINARY_IN_FLASH(name) uint8_f name[] IN_FLASH
+#define BINARY_IN_STORAGE(name) uint8_s name[] IN_STORAGE

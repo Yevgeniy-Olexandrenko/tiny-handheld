@@ -9,7 +9,10 @@ namespace th
 {
 	namespace mcu
 	{
-		void init()   {}
+		void init()
+		{
+		}
+
 		void update() {}
 
 		void wdtEnable(uint8_t mode, uint8_t prescaler)
