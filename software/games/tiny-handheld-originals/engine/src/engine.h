@@ -21,7 +21,7 @@
 #define FPS_ULOW WDT_TIMEOUT_500MS
 
 // Configuration
-#define DISABLE_FPS_SYNC 1
+#define DISABLE_FPS_SYNC   1
 
 namespace th
 {

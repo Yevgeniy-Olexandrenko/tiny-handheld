@@ -4,7 +4,7 @@
 #include "src/assets/fonts.h"
 #include "src/assets/logo.h"
 
-uint8_s picture [] IN_STORAGE =
+uint8_f picture [] IN_FLASH =
  {
 	0x00,0x03,0x05,0x09,0x11,0xFF,0x11,0x89,0x05,0xC3,0x00,0xE0,0x00,0xF0,0x00,0xF8,
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x44,0x28,0xFF,0x11,0xAA,0x44,0x00,0x00,0x00,
@@ -118,7 +118,7 @@ void RenderBackground()
 #if 1
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
   //rf |= th::video::RF_TRANSPARENT;
-  rf |= th::video::RF_INVERSE;
+  //rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
 	th::video::renderBitmap(rf, 0, 0, 128, 64, picture);
@@ -134,8 +134,8 @@ void RenderBackground()
 void RenderSprite(uint8_t x, uint8_t y)
 {
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
-	rf |= th::video::RF_TRANSPARENT;
-	// rf |= th::video::RF_INVERSE;
+	//rf |= th::video::RF_TRANSPARENT;
+	//rf |= th::video::RF_INVERSE;
 
 	th::video::setTileBank(tile_square, th::video::TF_BM_MASKBM);
 	for (uint8_t yy = 0; yy < s; ++yy)
@@ -201,7 +201,7 @@ void ClearBuffer()
 
 void RenderSequence()
 {
-//  ClearBuffer();
+  ClearBuffer();
 	RenderBackground();
 	RenderForeground();
 	RenderFPS();

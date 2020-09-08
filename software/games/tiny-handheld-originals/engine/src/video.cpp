@@ -44,6 +44,11 @@ namespace th
 			return b;
 		}
 
+		static uint8_t fetchData(TileAddr ta)
+		{
+			return m_tileBank[ta];
+		}
+
 		static void fetchTileData(TileAddr ta, RenderFlags rf, uint8_t bi, uint8_t &tb, uint8_t &tm)
 		{
 			ta += (rf & RF_FLIP_X) ? m_tileWidth - 1 - bi : bi;
@@ -147,9 +152,9 @@ namespace th
 			m_pageR = pageRange & 0x77;
 		}
 
-		void setTileBank(uint8_s* tileBank, TileFormat tileFormat, uint8_t tileWidth)
+		void setTileBank(const TileBank& tileBank, TileFormat tileFormat, uint8_t tileWidth)
 		{
-			m_tileBank   = TileBank(tileBank);
+			m_tileBank   = tileBank;
 			m_tileFormat = tileFormat;
 			m_tileWidth  = tileFormat & TF_BITS_FOR_WIDTH;
 
@@ -219,7 +224,7 @@ namespace th
 		}
 
 		// TODO: there must be a more efficient way
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_s *bitmap)
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const TileBank& bitmap)
 		{
 			uint8_t yh, ti;
 			if (isNotVisibleForRender(y, h)) return;
@@ -241,6 +246,7 @@ namespace th
 			}
 		}
 
+		
 		
 
 		////////////////////////////////////////////////////////////////////////

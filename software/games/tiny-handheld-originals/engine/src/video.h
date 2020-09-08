@@ -19,20 +19,27 @@ namespace th
 
 		struct TileBank
 		{
-			uint8_f *m_faddr;
-			uint8_s *m_saddr;
+			TileBank()
+			: m_type(memory::Type::NONE), m_addr(NULL)
+			{}
 
-			TileBank() : m_faddr(NULL), m_saddr(NULL) {}
-			//TileBank(uint8_f *addr) : m_faddr(addr), m_saddr(NULL) {}
-			TileBank(uint8_s *addr) : m_faddr(NULL), m_saddr(addr) {}
+			template<memory::Type M> 
+			TileBank(const th::memory::Wrapper<M, uint8_t> * addr)
+				: m_type(M), m_addr(addr)
+			{}
 
-			uint8_t operator[](TileAddr tileAddr) const
+			uint8_t operator[](TileAddr ta) const
 			{
-				return (m_saddr ? m_saddr[tileAddr] : (m_faddr ? m_faddr[tileAddr] : 0xFF));
+				if (m_type == memory::Type::STORAGE)
+					return static_cast<uint8_s *>(m_addr)[ta];
+				if (m_type == memory::Type::MCU_FLASH)
+					return static_cast<uint8_f *>(m_addr)[ta];
+				return 0xFF;
 			}
-		};
 
-		
+			memory::Type m_type;
+			void * m_addr;
+		};
 
 		enum TileFormat : uint8_t
 		{
@@ -66,15 +73,15 @@ namespace th
 		void update();
 
 		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
-		void setTileBank(uint8_s *tileBank, TileFormat tileFormat, uint8_t tileWidth = 0);
-		void setFontData(const FontData &fontData);
+		void setTileBank(const TileBank& tileBank, TileFormat tileFormat, uint8_t tileWidth = 0);
+		void setFontData(const FontData& fontData);
 		
 		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti);
 		void renderChar(RenderFlags rf, uint8_t x, uint8_t y, char ch);
 		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len);
 
 		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_s *bitmap);
+		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const TileBank& bitmap);
 		
 	}
 }
