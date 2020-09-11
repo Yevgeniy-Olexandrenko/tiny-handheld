@@ -119,7 +119,7 @@ void RenderBackground()
 {
 #if 1
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
-  //rf |= th::video::RF_TRANSPARENT;
+  //rf |= th::video::RF_TRANSP;
   //rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
@@ -136,7 +136,7 @@ void RenderBackground()
 void RenderSprite(uint8_t x, uint8_t y)
 {
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
-	rf |= th::video::RF_TRANSPARENT;
+	rf |= th::video::RF_TRANSP;
 	//rf |= th::video::RF_INVERSE;
 
 	th::video::setTileBank(th::video::TileBank(tile_square, th::video::TF_BM_MASKBM));
@@ -155,7 +155,7 @@ void RenderSprite(uint8_t x, uint8_t y)
 void RenderLogo(uint8_t x, uint8_t y)
 {
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
-	//rf |= th::video::RF_TRANSPARENT;
+	//rf |= th::video::RF_TRANSP;
 	//rf |= th::video::RF_INVERSE;
 	th::video::renderBitmap(rf, x, y, 48, 16, th::assets::tb_logo);
 }

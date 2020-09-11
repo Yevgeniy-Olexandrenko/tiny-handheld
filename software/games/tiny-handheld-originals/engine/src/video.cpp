@@ -43,11 +43,6 @@ namespace th
 			return b;
 		}
 
-		static uint8_t fetchData(TileAddr ta)
-		{
-			return m_tileBank[ta];
-		}
-
 		static void fetchTileData(TileAddr ta, RenderFlags rf, uint8_t bi, uint8_t &tb, uint8_t &tm)
 		{
 			ta += (rf & RF_FLIP_X) ? m_tileWidth - 1 - bi : bi;
@@ -56,22 +51,22 @@ namespace th
 			{
 			default:
 				tb = m_tileBank[ta];
-				tm = (rf & RF_TRANSPARENT) ? tb : 0xFF;
+				tm = (rf & RF_TRANSP) ? tb : 0xFF;
 				break;
 
 			case TF_BM_MASKBM:
 				tb = m_tileBank[ta];
-				tm = (rf & RF_TRANSPARENT) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				tm = (rf & RF_TRANSP) ? m_tileBank[ta + m_tileWidth] : 0xFF;
 				break;
 
 			case TF_BM_ODDBM:
 				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth] : m_tileBank[ta];
-				tm = (rf & RF_TRANSPARENT) ? tb : 0xFF;
+				tm = (rf & RF_TRANSP) ? tb : 0xFF;
 				break;
 
 			case TF_BM_MASKBM_ODDBM:
 				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth + m_tileWidth] : m_tileBank[ta];
-				tm = (rf & RF_TRANSPARENT) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				tm = (rf & RF_TRANSP) ? m_tileBank[ta + m_tileWidth] : 0xFF;
 				break;
 			}
 
