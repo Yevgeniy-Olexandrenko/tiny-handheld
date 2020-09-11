@@ -120,7 +120,7 @@ void RenderBackground()
 #if 1
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
   //rf |= th::video::RF_TRANSP;
-  //rf |= th::video::RF_INVERSE;
+  rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
 	th::video::renderBitmap(rf, 0, 0, 128, 64, tb_picture);
@@ -170,7 +170,7 @@ void RenderForeground()
 
 void RenderSomeText(uint8_t x, uint8_t y)
 {
-	th::video::setFontBank(th::assets::fb_font6x8);
+	th::video::setFontBank(th::assets::fb_font4x8);
 	th::video::renderText(th::video::RF_EMPTY, x, y, "Some text!", 10);
 }
 
@@ -235,4 +235,7 @@ void loop()
 
 	if (y == 0 || y == 63) dy = -dy;
 	if (x == 0 || x == 127) dx = -dx;
+
+  //th::video::setScrollXY(0, 0);
+ 	//th::display::writeCmd(0xD3, y);
 }

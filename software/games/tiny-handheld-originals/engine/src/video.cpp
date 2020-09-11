@@ -18,21 +18,26 @@ namespace th
 		uint8_t  m_pageY;
 		uint8_t  m_oddFrame;
 
+		Axis m_scrollX;
+		Axis m_scrollY;
+
 		////////////////////////////////////////////////////////////////////////
 
-		static bool isOnThisPage(uint8_t y)
-		{ 
-			return y >> 3 == m_page;
+		static bool isRenderable(Axis y)
+		{
+			// TODO: maybe it can be optimized?
+			return y < m_pageY + 8 && y + 8 > m_pageY;
 		}
 
-		static bool isOnNextPage(uint8_t y)
+		static bool isRenderable(Axis y, Size h)
 		{
-			return m_pageY >= y && m_pageY < y + 8;
+			return y < m_pageY + 8 && y + h > m_pageY;
 		}
 
-		static bool isNotVisibleForRender(uint8_t y, uint8_t h)
+		static void applyScroll(int8_t& x, int8_t& y)
 		{
-			return m_pageY + 8 <= y || m_pageY >= y + h;
+			x -= m_scrollX;
+			y -= m_scrollY;
 		}
 
 		static uint8_t reverseBits(uint8_t b)
@@ -99,6 +104,37 @@ namespace th
 			}
 		}
 
+		static void renderTileFromBank(RenderFlags rf, Axis x, Axis y, TileIndx ti)
+		{
+			uint8_t bs, bi, tb, tm; TileAddr ta;
+			if (y >= 0 && y >> 3 == m_page)
+			{
+				// Case #1 : tile top half
+				bs = y & 0x07;
+				ta = getTileAddr(ti);
+				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
+				{
+					if (x < 0) continue;
+					fetchTileData(ta, rf, bi, tb, tm);
+					m_renderBuffer[x] &= ~(tm << bs);
+					m_renderBuffer[x] |= tb << bs;
+				}
+			}
+			else if (m_pageY >= y && m_pageY < y + 8)
+			{
+				// Case #2 : tile bottom half
+				bs = m_pageY - y;
+				ta = getTileAddr(ti);
+				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
+				{
+					if (x < 0) continue;
+					fetchTileData(ta, rf, bi, tb, tm);
+					m_renderBuffer[x] &= ~(tm >> bs);
+					m_renderBuffer[x] |= tb >> bs;
+				}
+			}
+		}
+
 		////////////////////////////////////////////////////////////////////////
 
 		void init()
@@ -106,6 +142,7 @@ namespace th
 			m_oddFrame = false;
 			m_renderBuffer = NULL;
 			setRenderCallback(NULL);
+			m_scrollX = m_scrollY = 0;
 		}
 
 		void update()
@@ -146,7 +183,7 @@ namespace th
 			m_pageR = pageRange & 0x77;
 		}
 
-		void setTileBank(const TileBank& tileBank, uint8_t tileWidth)
+		void setTileBank(const TileBank& tileBank, Size tileWidth)
 		{
 			m_tileBank  = tileBank;
 			m_tileWidth = tileBank.m_format & TF_BITS_FOR_WIDTH;
@@ -165,76 +202,63 @@ namespace th
 			m_asciiBase = fontBank.m_asciiBase;
 		}
 
-		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti)
+		void setScrollXY(Axis sx, Axis sy)
 		{
-			uint8_t bs, bi, tb, tm; TileAddr ta;
-			if (isOnThisPage(y))
-			{
-				// Case #1 : top tile half
-				bs = y & 0x07;
-				ta = getTileAddr(ti);
-				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
-				{
-					fetchTileData(ta, rf, bi, tb, tm);
-					m_renderBuffer[x] &= ~(tm << bs);
-					m_renderBuffer[x] |= tb << bs;
-				}
-			}
-			else if (isOnNextPage(y))
-			{
-				// Case #2 : bottom tile half
-				bs = m_pageY - y;
-				ta = getTileAddr(ti);
-				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
-				{
-					fetchTileData(ta, rf, bi, tb, tm);
-					m_renderBuffer[x] &= ~(tm >> bs);
-					m_renderBuffer[x] |= tb >> bs;
-				}
-			}
+			m_scrollX = sx;
+			m_scrollY = sy;
 		}
 
-		void renderChar(RenderFlags rf, uint8_t x, uint8_t y, char ch)
+		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndx ti)
 		{
-			renderTile(rf, x, y, ch - m_asciiBase);
+			applyScroll(x, y);
+			renderTileFromBank(rf, x, y, ti);
 		}
 
-		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len)
+		void renderChar(RenderFlags rf, Axis x, Axis y, char ch)
 		{
-			uint8_t i;
-			if (isOnThisPage(y) || isOnNextPage(y))
+			applyScroll(x, y);
+			renderTileFromBank(rf, x, y, ch - m_asciiBase);
+		}
+
+		void renderText(RenderFlags rf, Axis x, Axis y, const char *text, uint8_t len)
+		{
+			applyScroll(x, y);
+			if (isRenderable(y))
 			{
-				for (i = 0; i < len && text[i]; ++i, x += m_tileWidth)
+				for (;len > 0 && (*text); --len, ++text, x += m_tileWidth)
 				{
-					renderTile(rf, x, y, text[i] - m_asciiBase);
+					renderTileFromBank(rf, x, y, (*text) - m_asciiBase);
 				}
 			}
 		}
 
-		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti)
+		void renderPattern(RenderFlags rf, Axis x, Axis y, Size w, Size h, TileIndx ti)
 		{
 			// TODO
 		}
 
-		// TODO: there must be a more efficient way
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const TileBank& bitmap)
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank& bitmap)
 		{
-			uint8_t yh, ti;
-			if (isNotVisibleForRender(y, h)) return;
-
-			setTileBank(bitmap, w);
-			if (rf & RF_FLIP_Y)
+			Axis yh; 
+			TileIndx ti;
+			applyScroll(x, y);
+			if (isRenderable(y, h))
 			{
-				for (yh = y + h, ti = 0; yh > y; yh -= 8, ++ti)
+				yh = y + h;
+				setTileBank(bitmap, w);
+				if (rf & RF_FLIP_Y)
 				{
-					renderTile(rf, x, yh - 8, ti);
+					for (ti = 0; y < yh; ++ti, yh -= 8)
+					{
+						renderTileFromBank(rf, x, yh - 8, ti);
+					}
 				}
-			}
-			else
-			{
-				for (yh = y + h, ti = 0; y < yh; y += 8, ++ti)
+				else
 				{
-					renderTile(rf, x, y, ti);
+					for (ti = 0; y < yh; ++ti, y += 8)
+					{
+						renderTileFromBank(rf, x, y, ti);
+					}
 				}
 			}
 		}

@@ -6,12 +6,19 @@ namespace th
 {
 	namespace video
 	{
-		// rendering sequence type defs and rendering context
+		typedef int8_t   Axis;
+		typedef uint8_t  Size;
+		typedef uint16_t TileAddr;
+		typedef uint8_t  TileIndx;
+
 		typedef void (*RenderCallback)();
 		extern uint8_t* m_renderBuffer;
 		extern uint8_t  m_page;
 		extern uint8_t  m_pageY;
 		extern uint8_t  m_oddFrame;
+
+		extern Axis m_scrollX;
+		extern Axis m_scrollY;
 
 		enum RenderFlags : uint8_t
 		{
@@ -22,19 +29,14 @@ namespace th
 			RF_EMPTY   = 0x00
 		};
 
-		// tile data access type defs
-		typedef uint16_t TileAddr;
-		typedef uint8_t  TileIndx;
-
 		enum TileFormat : uint8_t
 		{
 			TF_BM              = 0x00,
 			TF_BM_MASKBM       = 0x40,
 			TF_BM_ODDBM        = 0x80,
 			TF_BM_MASKBM_ODDBM = 0xC0,
-
-			TF_BITS_FOR_TYPE  = 0xC0,
-			TF_BITS_FOR_WIDTH = 0x3F
+			TF_BITS_FOR_TYPE   = 0xC0,
+			TF_BITS_FOR_WIDTH  = 0x3F
 		};
 
 		struct TileBank
@@ -81,15 +83,17 @@ namespace th
 		void update();
 
 		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
-		void setTileBank(const TileBank& tileBank, uint8_t tileWidth = 0);
-		void setFontBank(const FontBank& fontBank);
-		
-		void renderTile(RenderFlags rf, uint8_t x, uint8_t y, TileIndx ti);
-		void renderChar(RenderFlags rf, uint8_t x, uint8_t y, char ch);
-		void renderText(RenderFlags rf, uint8_t x, uint8_t y, const char *text, uint8_t len);
 
-		void renderPattern(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, TileIndx ti);
-		void renderBitmap(RenderFlags rf, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const TileBank& bitmap);
+		void setTileBank(const TileBank& tileBank, Size tileWidth = 0);
+		void setFontBank(const FontBank& fontBank);
+		void setScrollXY(Axis sx, Axis sy);
+		
+		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndx ti);
+		void renderChar(RenderFlags rf, Axis x, Axis y, char ch);
+		void renderText(RenderFlags rf, Axis x, Axis y, const char *text, uint8_t len);
+
+		void renderPattern(RenderFlags rf, Axis x, Axis y, Size w, Size h, TileIndx ti);
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank& bitmap);
 		
 	}
 }
