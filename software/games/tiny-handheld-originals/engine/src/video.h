@@ -12,10 +12,11 @@ namespace th
 		typedef uint8_t  TileIndx;
 
 		typedef void (*RenderCallback)();
-		extern uint8_t* m_renderBuffer;
-		extern uint8_t  m_page;
-		extern uint8_t  m_pageY;
-		extern uint8_t  m_oddFrame;
+		typedef void (*FillBufferCallback)(uint8_t column, uint8_t* buffer, uint8_t size);
+		
+		extern uint8_t m_page;
+		extern uint8_t m_pageY;
+		extern uint8_t m_oddFrame;
 
 		extern Axis m_scrollX;
 		extern Axis m_scrollY;
@@ -82,11 +83,15 @@ namespace th
 		void init();
 		void update();
 
-		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07);
+		void setRenderConfig(RenderCallback renderCallback, uint8_t pageRange = 0x07, uint16_t columnRange = 0x007F);
+		void setScrollXY(Axis sx, Axis sy);
 
 		void setTileBank(const TileBank& tileBank, Size tileWidth = 0);
 		void setFontBank(const FontBank& fontBank);
-		void setScrollXY(Axis sx, Axis sy);
+
+		void fillDisplay(uint8_t pattern);
+		void fillRenderBuffer(uint8_t pattern);
+		void fillRenderBufferDirect(FillBufferCallback fillBufferCallback);
 		
 		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndx ti);
 		void renderChar(RenderFlags rf, Axis x, Axis y, char ch);

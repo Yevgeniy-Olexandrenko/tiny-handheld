@@ -120,7 +120,7 @@ void RenderBackground()
 #if 1
 	th::video::RenderFlags rf = th::video::RF_EMPTY;
   //rf |= th::video::RF_TRANSP;
-  rf |= th::video::RF_INVERSE;
+  //rf |= th::video::RF_INVERSE;
   //rf |= th::video::RF_FLIP_Y;
   //rf |= th::video::RF_FLIP_X;
 	th::video::renderBitmap(rf, 0, 0, 128, 64, tb_picture);
@@ -197,17 +197,15 @@ void RenderBattery()
 	th::video::renderChar(th::video::RF_EMPTY, 12 + 6, 64-8, '%');
 }
 
-void ClearBuffer()
-{
-	memset(th::video::m_renderBuffer, 0x00, 128);
-}
 
 void RenderSequence()
 {
-  ClearBuffer();
+  th::video::fillRenderBuffer(0x00);
 	RenderBackground();
 	RenderForeground();
 	RenderFPS();
+
+  th::video::setRenderConfig(&RenderSequence, 0x07, 0x003F);
 }
 
 void setup()
@@ -216,7 +214,7 @@ void setup()
 	frame_count = 0;
 	fps = 0;
 
-	th::video::setRenderCallback(&RenderSequence);
+	th::video::setRenderConfig(&RenderSequence);
 }
 
 void loop()

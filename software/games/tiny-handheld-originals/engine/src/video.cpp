@@ -7,15 +7,19 @@ namespace th
 	namespace video
 	{
 		RenderCallback m_renderCallback;
-		uint8_t m_pageR;
-
+		uint8_t  m_pageR;
+		uint16_t m_columnR;
+		
 		TileBank m_tileBank;
+		uint8_t  m_tileSize;
 		uint8_t  m_tileWidth;
 		uint8_t  m_asciiBase;
 
 		uint8_t* m_renderBuffer;
 		uint8_t  m_page;
 		uint8_t  m_pageY;
+		uint8_t  m_columnF;
+		uint8_t  m_columnW;
 		uint8_t  m_oddFrame;
 
 		Axis m_scrollX;
@@ -48,10 +52,14 @@ namespace th
 			return b;
 		}
 
-		static void fetchTileData(TileAddr ta, RenderFlags rf, uint8_t bi, uint8_t &tb, uint8_t &tm)
+		// Tile data fetching procedure optimized to read bytes from storage:
+		// 1. Strictly in sequence.
+		// 2. Without skipping any data bytes.
+		// 3. In the direction of increasing the data address.
+		// It is needed for efficient memory access (especially for i2c EEPROM)
+		static void fetchTileData(RenderFlags rf, TileAddr ta, uint8_t &tb, uint8_t &tm)
 		{
-			ta += (rf & RF_FLIP_X) ? m_tileWidth - 1 - bi : bi;
-
+			uint8_t b0, b1, b2;
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
@@ -60,18 +68,24 @@ namespace th
 				break;
 
 			case TF_BM_MASKBM:
-				tb = m_tileBank[ta];
-				tm = (rf & RF_TRANSP) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				tb = m_tileBank[ta++];
+				b1 = m_tileBank[ta];
+				tm = (rf & RF_TRANSP) ? b1 : 0xFF;
 				break;
 
 			case TF_BM_ODDBM:
-				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth] : m_tileBank[ta];
+				b0 = m_tileBank[ta++];
+				b1 = m_tileBank[ta];
+				tb = m_oddFrame ? b1 : b0;
 				tm = (rf & RF_TRANSP) ? tb : 0xFF;
 				break;
 
 			case TF_BM_MASKBM_ODDBM:
-				tb = m_oddFrame ? m_tileBank[ta + m_tileWidth + m_tileWidth] : m_tileBank[ta];
-				tm = (rf & RF_TRANSP) ? m_tileBank[ta + m_tileWidth] : 0xFF;
+				b0 = m_tileBank[ta++];
+				b1 = m_tileBank[ta++];
+				b2 = m_tileBank[ta];
+				tb = m_oddFrame ? b2 : b0;
+				tm = (rf & RF_TRANSP) ? b1 : 0xFF;
 				break;
 			}
 
@@ -88,49 +102,69 @@ namespace th
 			}
 		}
 
-		static TileAddr getTileAddr(TileIndx ti)
+		static uint8_t getTileBitmapSize()
 		{
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
-				return ti * m_tileWidth;
+				return 1;
 
 			case TF_BM_MASKBM:
 			case TF_BM_ODDBM:
-				return ti * 2 * m_tileWidth;
+				return 2;
 
 			case TF_BM_MASKBM_ODDBM:
-				return ti * 3 * m_tileWidth;
+				return 3;
 			}
 		}
 
+		static void getRenderDirection(RenderFlags rf, Axis x, int8_t &xx, int8_t &dx)
+		{
+			xx = x, dx = 1;
+			if (rf & RF_FLIP_X)
+			{
+				xx += m_tileWidth - 1;
+				dx = -1;
+			}
+			xx -= m_columnF;
+		} 
+
 		static void renderTileFromBank(RenderFlags rf, Axis x, Axis y, TileIndx ti)
 		{
-			uint8_t bs, bi, tb, tm; TileAddr ta;
+			uint8_t bi, bs, tb, tm; int8_t xx, dx; // ???
+			TileAddr ta; uint8_t tbs = getTileBitmapSize();
+			
 			if (y >= 0 && y >> 3 == m_page)
 			{
 				// Case #1 : tile top half
 				bs = y & 0x07;
-				ta = getTileAddr(ti);
-				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
+				ta = ti * m_tileWidth * tbs;
+				getRenderDirection(rf, x, xx, dx);
+
+				for (bi = m_tileWidth; bi > 0; --bi, ta += tbs, xx += dx)
 				{
-					if (x < 0) continue;
-					fetchTileData(ta, rf, bi, tb, tm);
-					m_renderBuffer[x] &= ~(tm << bs);
-					m_renderBuffer[x] |= tb << bs;
+					if (xx < 0 || xx >= m_columnW) continue;
+					
+					fetchTileData(rf, ta, tb, tm);
+					m_renderBuffer[xx] &= ~(tm << bs);
+					m_renderBuffer[xx] |= tb << bs;
 				}
+				
 			}
 			else if (m_pageY >= y && m_pageY < y + 8)
 			{
 				// Case #2 : tile bottom half
 				bs = m_pageY - y;
-				ta = getTileAddr(ti);
-				for (bi = 0; bi < m_tileWidth && x < 128; ++bi, ++x)
+				ta = ti * m_tileWidth * tbs;
+				getRenderDirection(rf, x, xx, dx);
+
+				for (bi = m_tileWidth; bi > 0; --bi, ta += tbs, xx += dx)
 				{
-					if (x < 0) continue;
-					fetchTileData(ta, rf, bi, tb, tm);
-					m_renderBuffer[x] &= ~(tm >> bs);
-					m_renderBuffer[x] |= tb >> bs;
+					if (xx < 0 || xx >= m_columnW) continue;
+					
+					fetchTileData(rf, ta, tb, tm);
+					m_renderBuffer[xx] &= ~(tm >> bs);
+					m_renderBuffer[xx] |= tb >> bs;
 				}
 			}
 		}
@@ -141,7 +175,7 @@ namespace th
 		{
 			m_oddFrame = false;
 			m_renderBuffer = NULL;
-			setRenderCallback(NULL);
+			setRenderConfig(NULL);
 			m_scrollX = m_scrollY = 0;
 		}
 
@@ -149,22 +183,22 @@ namespace th
 		{
 			if (m_renderCallback)
 			{
-				// prepare rendering buffer
-				uint8_t buf[129] = { 0x40 };
-				m_renderBuffer = &buf[0x01];
-
 				// prepare rendering configuration 
-				uint8_t pageF = m_pageR >> 4;
+				uint8_t pageF = m_pageR >> 0x4;
 				uint8_t pageL = m_pageR & 0x0F;
+				m_columnF = (m_columnR >> 0x8);
+				m_columnW = (m_columnR & 0xFF) - m_columnF + 1;
 				RenderCallback renderCallback = m_renderCallback;
+
+				// prepare rendering buffer
+				uint8_t buf[1 + m_columnW] = { 0x40 };
+				m_renderBuffer = &buf[1];
 
 				// do actual rendering page by page
 				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
-					display::writeCmd(0xb0 | m_page);
-		 			display::writeCmd(0x00);
-		 			display::writeCmd(0x10);
+					display::position(m_page, m_columnF);
 
 					// call same rendering pipeline for every page
 					renderCallback();
@@ -175,12 +209,19 @@ namespace th
 			m_oddFrame ^= true;
 		}
 
-		void setRenderCallback(RenderCallback renderCallback, uint8_t pageRange = 0x07)
+		void setRenderConfig(RenderCallback renderCallback, uint8_t pageRange, uint16_t columnRange)
 		{
 			// Rendering configuration may be changed at the end of rendering
 			// pipeline. In this case it will be applied on the next frame.
 			m_renderCallback = renderCallback;
 			m_pageR = pageRange & 0x77;
+			m_columnR = columnRange & 0x7F7F;
+		}
+
+		void setScrollXY(Axis sx, Axis sy)
+		{
+			m_scrollX = sx;
+			m_scrollY = sy;
 		}
 
 		void setTileBank(const TileBank& tileBank, Size tileWidth)
@@ -202,10 +243,19 @@ namespace th
 			m_asciiBase = fontBank.m_asciiBase;
 		}
 
-		void setScrollXY(Axis sx, Axis sy)
+		void fillDisplay(uint8_t pattern)
 		{
-			m_scrollX = sx;
-			m_scrollY = sy;
+			if (!m_renderBuffer) display::fill(pattern);
+		}
+
+		void fillRenderBuffer(uint8_t pattern)
+		{
+			memset(m_renderBuffer, pattern, m_columnW);
+		}
+
+		void fillRenderBufferDirect(FillBufferCallback fillBufferCallback)
+		{
+			fillBufferCallback(m_columnF, m_renderBuffer, m_columnW);
 		}
 
 		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndx ti)
