@@ -46,7 +46,7 @@ namespace th
 			T Read(const Wrapper<Type::EXT_EEPROM, T> *data)
 			{
 				T ret;
-				eeprom::readBlock(&ret, data, sizeof(T));
+				eeprom::readBlock(data, &ret, sizeof(T));
 				return ret;
 			}
 		};

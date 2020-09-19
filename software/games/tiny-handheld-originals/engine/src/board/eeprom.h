@@ -9,7 +9,7 @@ namespace th
 		void init();
 		void update();
 
-		uint8_t readByte(const void *p);
-		void readBlock(void *dest, const void *src, size_t n);
+		uint8_t readByte(uint16_t addr);
+		void readBlock(uint16_t addr, uint8_t *dest, size_t n);
 	}
 }
