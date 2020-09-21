@@ -38,8 +38,10 @@ namespace th
 		{
 			TileBank();
 
-			TileBank(const TileBank_f& tb);
-			TileBank(const TileBank_s& tb);
+			template<typename TB>
+			TileBank(const TB& tb)
+				: TileBank(tb.m_addr, tb.m_format)
+			{}
 
 			template<memory::Type M> 
 			TileBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format)
@@ -62,8 +64,10 @@ namespace th
 
 		struct FontBank : TileBank
 		{
-			FontBank(const FontBank_f& fb);
-			FontBank(const FontBank_s& fb);
+			template <typename FB>
+			FontBank(const FB &fb)
+				: FontBank(fb.m_addr, fb.m_format, fb.m_asciiBase)
+			{}
 
 			template<memory::Type M> 
 			FontBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format, uint8_t asciiBase)
