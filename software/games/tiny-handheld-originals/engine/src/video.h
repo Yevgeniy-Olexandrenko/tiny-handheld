@@ -16,8 +16,8 @@ namespace th
 		
 		extern uint8_t m_page;
 		extern uint8_t m_pageY;
-		extern uint8_t m_oddFrame;
 
+		extern bool m_oddFrame;
 		extern Axis m_scrollX;
 		extern Axis m_scrollY;
 
@@ -32,12 +32,12 @@ namespace th
 
 		enum TileFormat : uint8_t
 		{
-			TF_BM              = 0x00,
-			TF_BM_MASKBM       = 0x40,
-			TF_BM_ODDBM        = 0x80,
-			TF_BM_MASKBM_ODDBM = 0xC0,
-			TF_BITS_FOR_TYPE   = 0xC0,
-			TF_BITS_FOR_WIDTH  = 0x3F
+			TF_BM             = 0x00,
+			TF_BM_MSKBM       = 0x40,
+			TF_BM_ODDBM       = 0x80,
+			TF_BM_MSKBM_ODDBM = 0xC0,
+			TF_BITS_FOR_TYPE  = 0xC0,
+			TF_BITS_FOR_WIDTH = 0x3F
 		};
 
 		struct TileBank

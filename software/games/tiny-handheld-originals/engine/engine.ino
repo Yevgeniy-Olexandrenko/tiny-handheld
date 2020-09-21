@@ -139,7 +139,7 @@ void RenderSprite(uint8_t x, uint8_t y)
 	rf |= th::video::RF_TRANSP;
 	//rf |= th::video::RF_INVERSE;
 
-	th::video::setTileBank(th::video::TileBank(tile_square, th::video::TF_BM_MASKBM));
+	th::video::setTileBank(th::video::TileBank(tile_square, th::video::TF_BM_MSKBM));
  
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
@@ -205,7 +205,7 @@ void RenderSequence()
 	RenderForeground();
 	RenderFPS();
 
-  th::video::setRenderConfig(&RenderSequence, 0x07, 0x003F);
+  //th::video::setRenderConfig(&RenderSequence, 0x07, 0x003F);
 }
 
 void setup()
