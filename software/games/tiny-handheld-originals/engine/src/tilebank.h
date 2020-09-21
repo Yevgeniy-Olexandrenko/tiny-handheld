@@ -6,14 +6,43 @@ namespace th
 {
 	namespace video
 	{
+		struct TileBank_f
+		{
+			uint8_f* m_addr;
+			uint8_f  m_format;
+		};
+
+		struct TileBank_s
+		{
+			uint8_s* m_addr;
+			uint8_s  m_format;
+		};
+
+		struct FontBank_s
+		{
+			uint8_s* m_addr;
+			uint8_s  m_format;
+			uint8_s  m_asciiBase;
+		};
+
+		struct FontBank_f
+		{
+			uint8_f* m_addr;
+			uint8_f  m_format;
+			uint8_f  m_asciiBase;
+		};
+
 		typedef uint16_t TileAddr;
 
 		struct TileBank
 		{
 			TileBank();
 
+			TileBank(const TileBank_f& tb);
+			TileBank(const TileBank_s& tb);
+
 			template<memory::Type M> 
-			TileBank(const memory::Wrapper<M, uint8_t> * addr, uint8_t format)
+			TileBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format)
 				: m_type(M)
 				, m_addr(addr)
 				, m_format(format)
@@ -33,8 +62,11 @@ namespace th
 
 		struct FontBank : TileBank
 		{
+			FontBank(const FontBank_f& fb);
+			FontBank(const FontBank_s& fb);
+
 			template<memory::Type M> 
-			FontBank(const memory::Wrapper<M, uint8_t> * addr, uint8_t format, uint8_t asciiBase)
+			FontBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format, uint8_t asciiBase)
 				: TileBank(addr, format)
 				, m_asciiBase(asciiBase)
 			{}
@@ -43,3 +75,9 @@ namespace th
 		};
 	}
 }
+
+#define TILEBANK_IN_FLASH(name)   const th::video::TileBank_f name IN_FLASH
+#define TILEBANK_IN_STORAGE(name) const th::video::TileBank_s name IN_STORAGE
+
+#define FONTBANK_IN_FLASH(name)   const th::video::FontBank_f name IN_FLASH
+#define FONTBANK_IN_STORAGE(name) const th::video::FontBank_s name IN_STORAGE

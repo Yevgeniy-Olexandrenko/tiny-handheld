@@ -123,8 +123,8 @@ namespace th
 
 		static void renderTileFromBank(RenderFlags rf, Axis x, Axis y, TileIndx ti)
 		{
-			uint8_t bi, bs, tb, tm; Axis dx; TileAddr ta;
-			uint8_t tbs = getTileBitmapSize();
+			uint8_t bi, bs, tb, tm; Axis &dx = y;
+			uint8_t tbs = getTileBitmapSize(); TileAddr ta;
 			
 			if (y >= 0 && y >> 3 == m_page)
 			{

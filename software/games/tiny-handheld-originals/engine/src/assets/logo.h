@@ -23,6 +23,6 @@ namespace th
 			0xb4, 0xb5, 0xb4, 0xb4, 0xb5, 0x95, 0x84, 0xff
 		};
 
-		video::TileBank tb_logo(logo, video::TF_BM);
+		TILEBANK_IN_STORAGE(tb_logo) = { logo, video::TF_BM };
 	}
 }

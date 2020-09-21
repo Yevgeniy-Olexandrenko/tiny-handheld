@@ -11,6 +11,14 @@ namespace th
 			, m_format(0)
 		{}
 
+		TileBank::TileBank(const TileBank_f& tilebank)
+			: TileBank(tilebank.m_addr, tilebank.m_format)
+		{}
+
+		TileBank::TileBank(const TileBank_s& tilebank)
+			: TileBank(tilebank.m_addr, tilebank.m_format)
+		{}
+
 		void TileBank::connect()
 		{
 			//
@@ -66,5 +74,13 @@ namespace th
 				b2 = data[ta];
 			}
 		}
+
+		FontBank::FontBank(const FontBank_f& fontbank)
+			: FontBank(fontbank.m_addr, fontbank.m_format, fontbank.m_asciiBase)
+		{}
+
+		FontBank::FontBank(const FontBank_s& fontbank)
+			: FontBank(fontbank.m_addr, fontbank.m_format, fontbank.m_asciiBase)
+		{}
 	}
 }

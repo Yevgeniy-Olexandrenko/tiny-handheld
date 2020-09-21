@@ -4,7 +4,7 @@
 #include "src/assets/fonts.h"
 #include "src/assets/logo.h"
 
-uint8_f picture [] IN_FLASH =
+BINARY_IN_STORAGE(picture) =
  {
 	0x00,0x03,0x05,0x09,0x11,0xFF,0x11,0x89,0x05,0xC3,0x00,0xE0,0x00,0xF0,0x00,0xF8,
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x44,0x28,0xFF,0x11,0xAA,0x44,0x00,0x00,0x00,
@@ -72,9 +72,9 @@ uint8_f picture [] IN_FLASH =
 	0x00,0x00,0x26,0x49,0x49,0x49,0x32,0x00,0x00,0x7F,0x02,0x04,0x08,0x10,0x7F,0x00,
 };
 
-th::video::TileBank tb_picture(picture, th::video::TF_BM);
+TILEBANK_IN_STORAGE(tb_picture) = { picture, th::video::TF_BM };
 
-uint8_s tile_square[] IN_STORAGE =
+BINARY_IN_STORAGE(tile_square) =
 {
   // bits A
   0b00000000,
@@ -115,6 +115,15 @@ uint32_t saved_time;
 uint8_t frame_count;
 uint8_t fps;
 
+void FillBuffer(uint8_t column, uint8_t* buffer, uint8_t size)
+{
+  for (uint8_t col = column; col < column + size; ++col)
+  {
+    bool isSolid = (th::video::m_page & 0x01) ^ (col >> 3 & 0x01);
+    buffer[col - column] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::video::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
+  }
+}
+
 void RenderBackground()
 {
 #if 1
@@ -125,11 +134,7 @@ void RenderBackground()
   //rf |= th::video::RF_FLIP_X;
 	th::video::renderBitmap(rf, 0, 0, 128, 64, tb_picture);
 #else
-	for (uint8_t col = 0; col < 128; ++col)
-	{
-		bool isSolid = (th::video::m_page & 0x01) ^ (col >> 3 & 0x01);
-		th::video::m_renderBuffer[col] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::video::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
-	}
+	th::video::fillRenderBufferDirect(&FillBuffer);
 #endif
 }
 
@@ -205,7 +210,7 @@ void RenderSequence()
 	RenderForeground();
 	RenderFPS();
 
-  //th::video::setRenderConfig(&RenderSequence, 0x07, 0x003F);
+  //th::video::setRenderConfig(&RenderSequence, 0x07, 0x1F5F);
 }
 
 void setup()
