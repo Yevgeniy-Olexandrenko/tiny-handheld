@@ -11,7 +11,6 @@ namespace th
 		uint16_t m_columnR;
 		
 		TileBank m_tileBank;
-		uint8_t  m_tileSize;
 		uint8_t  m_tileWidth;
 		uint8_t  m_asciiBase;
 
@@ -65,27 +64,23 @@ namespace th
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
-				tb = m_tileBank[ta];
+				m_tileBank.get(ta, tb);
 				tm = (rf & RF_TRANSP) ? tb : 0xFF;
 				break;
 
 			case TF_BM_MSKBM:
-				tb = m_tileBank[ta++];
-				b1 = m_tileBank[ta];
+				m_tileBank.get(ta, tb, b1);
 				tm = (rf & RF_TRANSP) ? b1 : 0xFF;
 				break;
 
 			case TF_BM_ODDBM:
-				b0 = m_tileBank[ta++];
-				b1 = m_tileBank[ta];
+				m_tileBank.get(ta, b0, b1);
 				tb = m_oddFrame ? b1 : b0;
 				tm = (rf & RF_TRANSP) ? tb : 0xFF;
 				break;
 
 			case TF_BM_MSKBM_ODDBM:
-				b0 = m_tileBank[ta++];
-				b1 = m_tileBank[ta++];
-				b2 = m_tileBank[ta];
+				m_tileBank.get(ta, b0, b1, b2);
 				tb = m_oddFrame ? b2 : b0;
 				tm = (rf & RF_TRANSP) ? b1 : 0xFF;
 				break;
@@ -108,15 +103,10 @@ namespace th
 		{
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
-			default:
-				return 1;
-
+			default: return 1;
 			case TF_BM_MSKBM:
-			case TF_BM_ODDBM:
-				return 2;
-
-			case TF_BM_MSKBM_ODDBM:
-				return 3;
+			case TF_BM_ODDBM: return 2;
+			case TF_BM_MSKBM_ODDBM: return 3;
 			}
 		}
 
@@ -202,10 +192,14 @@ namespace th
 				for (m_page = pageF; m_page <= pageL; ++m_page)
 				{
 					m_pageY = m_page << 3;
-					display::position(m_page, m_columnF);
 
 					// call same rendering pipeline for every page
+					TileBank::connect();
 					renderCallback();
+					TileBank::disconnect();
+
+					// send buffer data to specific location on display
+					display::position(m_page, m_columnF);
 					display::writeBuf(buf, sizeof(buf));
 				}
 				m_buffer = NULL;

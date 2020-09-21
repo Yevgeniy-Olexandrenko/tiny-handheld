@@ -10,11 +10,7 @@ namespace th
 
 		struct TileBank
 		{
-			TileBank()
-				: m_type(memory::Type::NONE)
-				, m_addr(NULL)
-				, m_format(0)
-			{}
+			TileBank();
 
 			template<memory::Type M> 
 			TileBank(const memory::Wrapper<M, uint8_t> * addr, uint8_t format)
@@ -23,14 +19,12 @@ namespace th
 				, m_format(format)
 			{}
 
-			uint8_t operator[](TileAddr ta) const
-			{
-				if (m_type == memory::Type::STORAGE)
-					return static_cast<uint8_s *>(m_addr)[ta];
-				if (m_type == memory::Type::MCU_FLASH)
-					return static_cast<uint8_f *>(m_addr)[ta];
-				return 0xFF;
-			}
+			static void connect();
+			static void disconnect();
+
+			void get(TileAddr ta, uint8_t &b0) const;
+			void get(TileAddr ta, uint8_t &b0, uint8_t &b1) const;
+			void get(TileAddr ta, uint8_t &b0, uint8_t &b1, uint8_t &b2) const;
 
 			uint8_t m_format;
 			uint8_t m_type;
