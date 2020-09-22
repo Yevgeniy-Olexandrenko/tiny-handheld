@@ -23,27 +23,19 @@ namespace th
 		};
 
 		template <Type M, typename T> struct Wrapper;
-
-		template <bool V, typename T, typename F> struct select
-		{
-			typedef T type;
-		};
-
-		template <typename T, typename F> struct select<false, T, F>
-		{
-			typedef F type;
-		};
+		template <bool V, typename T, typename F> struct select	{ typedef T type; };
+		template <typename T, typename F> struct select<false, T, F> { typedef F type; };
 
 		template <Type M, typename T> struct MultiByte
 		{
-			T Read(const Wrapper<Type::MCU_FLASH, T> *data)
+			static T Read(const Wrapper<Type::MCU_FLASH, T> *data)
 			{
 				T ret;
 				memcpy_P(&ret, data, sizeof(T));
 				return ret;
 			}
 
-			T Read(const Wrapper<Type::EXT_EEPROM, T> *data)
+			static T Read(const Wrapper<Type::EXT_EEPROM, T> *data)
 			{
 				T ret;
 				eeprom::readBlock(data, &ret, sizeof(T));
@@ -53,12 +45,12 @@ namespace th
 
 		template <Type M, typename T> struct SingleByte
 		{
-			T Read(const Wrapper<Type::MCU_FLASH, T> *data)
+			static T Read(const Wrapper<Type::MCU_FLASH, T> *data)
 			{
 				return pgm_read_byte(data);
 			}
 
-			T Read(const Wrapper<Type::EXT_EEPROM, T> *data)
+			static T Read(const Wrapper<Type::EXT_EEPROM, T> *data)
 			{
 				return eeprom::readByte(data);
 			}
@@ -70,12 +62,12 @@ namespace th
 
 			operator const T() const
 			{
-				return Reader().Read(this);
+				return Reader::Read(this);
 			}
 
 			bool operator==(const T &in)
 			{
-				return Reader().Read(this) == in;
+				return Reader::Read(this) == in;
 			}
 
 			T t;

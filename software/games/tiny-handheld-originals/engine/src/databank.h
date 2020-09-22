@@ -33,6 +33,7 @@ namespace th
 		};
 
 		typedef uint16_t TileAddr;
+		typedef void* Address;
 
 		struct TileBank
 		{
@@ -59,7 +60,7 @@ namespace th
 
 			uint8_t m_format;
 			uint8_t m_type;
-			void*   m_addr;
+			Address m_addr;
 		};
 
 		struct FontBank : TileBank
