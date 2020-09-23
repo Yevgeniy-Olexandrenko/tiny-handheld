@@ -33,7 +33,7 @@ namespace th
 		};
 
 		typedef uint16_t TileAddr;
-		typedef void* Address;
+		typedef const void* Address;
 
 		struct TileBank
 		{
