@@ -15,20 +15,19 @@
 #include "video.h"
 #include "sound.h"
 
-// Configuration
-#define DISABLE_FPS_SYNC   0
-
 namespace th
 {
 	namespace engine
 	{
-		typedef u08 FrameTime;
-		const FrameTime FT_16MS   = WDT_TIMEOUT_16MS;
-		const FrameTime FT_32MS   = WDT_TIMEOUT_32MS;
-		const FrameTime FT_500MS  = WDT_TIMEOUT_500MS;
-		const FrameTime FT_1000MS = WDT_TIMEOUT_1S;
+		typedef u08 FPS;
+		const FPS FPS_UNLIMITED = 0;
+		const FPS FPS_60 = 1; // 62.5 FPS 
+		const FPS FPS_30 = 2; // 31.3 FPS
+		const FPS FPS_15 = 3; // 15.6 FPS
+		const FPS FPS_02 = 6; // 1.95 FPS
+		const FPS FPS_01 = 7; // 0.98 FPS
 		
-		void setFrameTime(FrameTime frameTime);
+		void setFPS(FPS fps);
 		u32  getCurrentTimeMillis();
 	}
 }

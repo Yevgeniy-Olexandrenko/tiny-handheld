@@ -8,26 +8,31 @@ namespace th
 {
 	namespace engine
 	{
+		static const u08 F_SCALE_MSK = 0x07;
+		static const u08 F_FSYNC_BIT = 0x03;
+		static const u08 F_SLEEP_BIT = 0x04;
+		
 		static volatile struct
 		{
 			u16 count_l;
 			u08 count_h;
+			u08 divider;
 			u08 scale_f;
 		} m_frame;
 		
-		static const u08 F_SCALE_MSK = 0x0F;
-		static const u08 F_SLEEP_BIT = 0x04; 
-
+		static void reloadFrameDivider()
+		{
+			m_frame.divider = _BV(m_frame.scale_f & F_SCALE_MSK);
+		}
+		
 		static void waitNextFrame()
 		{
-#if !DISABLE_FPS_SYNC
 			set_bit(m_frame.scale_f, F_SLEEP_BIT);
 			while (is_bit_set(m_frame.scale_f, F_SLEEP_BIT))
 			{
 				sleep_enable();
 				sleep_mode();
-			}
-#endif			
+			}			
 		}
 
 		void init()
@@ -47,8 +52,7 @@ namespace th
 			// init main programm
 			m_frame.count_l = 0;
 			m_frame.count_h = 0;
-			m_frame.scale_f = 0;
-			setFrameTime(FT_32MS);
+			setFPS(FPS_UNLIMITED);
 			::init();
 		}
 
@@ -64,22 +68,32 @@ namespace th
 			// update outputs
 			video::update();
 			sound::update();
-			waitNextFrame();
+			
+			if (is_bit_set(m_frame.scale_f, F_FSYNC_BIT))
+			{
+				waitNextFrame();
+			}
 		}
 
-		void setFrameTime(FrameTime frameTime)
+		void setFPS(FPS fps)
 		{
 			cli();
 			mcu::wdtDisable();
 			set_sleep_mode(SLEEP_MODE_IDLE);
-			mcu::wdtEnable(WDT_MODE_INT, frameTime);
-			m_frame.scale_f = frameTime & F_SCALE_MSK;
+			mcu::wdtEnable(WDT_MODE_INT, WDT_TIMEOUT_16MS);
+			m_frame.scale_f = 0;
+			if (fps)
+			{
+				m_frame.scale_f = (--fps & F_SCALE_MSK);
+				set_bit(m_frame.scale_f, F_FSYNC_BIT);
+			}
+			reloadFrameDivider();
 			sei();		
 		}
 		
 		u32 getCurrentTimeMillis()
 		{
-			return (m_frame.count_h << 16 | m_frame.count_l) * (16 << (m_frame.scale_f & F_SCALE_MSK));
+			return (m_frame.count_h << 16 | m_frame.count_l) << 4;
 		}
 	}
 }
@@ -88,7 +102,11 @@ ISR(WDT_vect)
 {
 	using namespace th::engine;
 	if (++m_frame.count_l == 0) ++m_frame.count_h;
-	clear_bit(m_frame.scale_f, F_SLEEP_BIT);
+	if (--m_frame.divider == 0)
+	{
+		clear_bit(m_frame.scale_f, F_SLEEP_BIT);
+		reloadFrameDivider();
+	}
 }
 
 int main(void)
