@@ -14,6 +14,10 @@
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
+#define set_bit(sfr, bit) ((sfr) |= _BV(bit))
+#define clear_bit(sfr, bit) ((sfr) &= ~_BV(bit))
+#define is_bit_set(sfr, bit) ((sfr) & _BV(bit))
+#define is_bit_clear(sfr, bit) (!((sfr) & _BV(bit)))
 
 typedef int8_t   s08;
 typedef uint8_t  u08;

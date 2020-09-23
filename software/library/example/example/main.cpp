@@ -190,15 +190,9 @@ void RenderSequence()
 	//th::video::setRenderConfig(&RenderSequence, 0x07, 0x1F5F);
 }
 
-uint32_t millis()
-{
-	// TODO
-	return 0;
-}
-
 void init()
 {
-	saved_time = millis();
+	saved_time = th::engine::getCurrentTimeMillis();
 	frame_count = 0;
 	fps = 0;
 
@@ -207,7 +201,7 @@ void init()
 
 void update()
 {
-	uint32_t current_time = millis();
+	uint32_t current_time = th::engine::getCurrentTimeMillis();
 	if (current_time >= saved_time + 1000)
 	{
 		fps = frame_count;

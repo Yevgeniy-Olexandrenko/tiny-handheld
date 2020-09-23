@@ -15,18 +15,20 @@
 #include "video.h"
 #include "sound.h"
 
-// Definitions
-#define FPS_HIGH WDT_TIMEOUT_16MS
-#define FPS_LOW  WDT_TIMEOUT_32MS
-#define FPS_ULOW WDT_TIMEOUT_500MS
-
 // Configuration
-#define DISABLE_FPS_SYNC   1
+#define DISABLE_FPS_SYNC   0
 
 namespace th
 {
 	namespace engine
 	{
-		void setFPS(uint8_t fps);
+		typedef u08 FrameTime;
+		const FrameTime FT_16MS   = WDT_TIMEOUT_16MS;
+		const FrameTime FT_32MS   = WDT_TIMEOUT_32MS;
+		const FrameTime FT_500MS  = WDT_TIMEOUT_500MS;
+		const FrameTime FT_1000MS = WDT_TIMEOUT_1S;
+		
+		void setFrameTime(FrameTime frameTime);
+		u32  getCurrentTimeMillis();
 	}
 }
