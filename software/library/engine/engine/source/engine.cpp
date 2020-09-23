@@ -1,8 +1,8 @@
 #include "engine.h"
 
 // main program callbacks
-extern void setup();
-extern void loop();
+extern void init();
+extern void update();
 
 namespace th
 {
@@ -38,7 +38,7 @@ namespace th
 
 			// init main programm
 			setFPS(FPS_HIGH);
-			setup();
+			::init();
 		}
 
 		void update()
@@ -48,7 +48,7 @@ namespace th
 			buttons::update();
 
 			// update main program
-			loop();
+			::update();
 
 			// update outputs
 			video::update();

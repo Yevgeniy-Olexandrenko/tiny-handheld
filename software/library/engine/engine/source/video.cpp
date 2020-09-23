@@ -6,19 +6,19 @@ namespace th
 {
 	namespace video
 	{
-		RenderCallback m_renderCallback;
-		uint8_t  m_pageR;
-		uint16_t m_columnR;
+		static RenderCallback m_renderCallback;
+		static u08 m_pageR;
+		static u16 m_columnR;
 		
-		TileBank m_tileBank;
-		uint8_t  m_tileWidth;
-		uint8_t  m_asciiBase;
+		static TileBank m_tileBank;
+		static u08 m_tileWidth;
+		static u08 m_asciiBase;
 
-		uint8_t  m_page;
-		uint8_t  m_pageY;
-		uint8_t  m_columnF;
-		uint8_t  m_bufferW;
-		uint8_t* m_buffer;
+		static u08 m_page;
+		static u08 m_pageY;
+		static u08 m_columnF;
+		static u08 m_bufferW;
+		static p08 m_buffer;
 
 		bool m_oddFrame;
 		Axis m_scrollX;
@@ -37,13 +37,13 @@ namespace th
 			return y < m_pageY + 8 && y + h > m_pageY;
 		}
 
-		static void applyScroll(int8_t& x, int8_t& y)
+		static void applyScroll(Axis& x, Axis& y)
 		{
 			x -= m_scrollX;
 			y -= m_scrollY;
 		}
 
-		static uint8_t reverseBits(uint8_t b)
+		static u08 reverseBits(u08 b)
 		{
 			if (b == 0x00 || b == 0xFF) return b;
 			
@@ -58,9 +58,9 @@ namespace th
 		// 2. Without skipping any data bytes.
 		// 3. In the direction of increasing the data address.
 		// It is needed for efficient memory access (especially for i2c EEPROM)
-		static void fetchTileData(RenderFlags rf, TileAddr ta, uint8_t &tb, uint8_t &tm)
+		static void fetchTileData(RenderFlags rf, TileAddr ta, Bitmap& tb, Bitmap& tm)
 		{
-			uint8_t b0, b1, b2;
+			Bitmap b0, b1, b2;
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
 			default:
@@ -99,7 +99,7 @@ namespace th
 			}
 		}
 
-		static uint8_t getTileBitmapSize()
+		static u08 getTileBitmapSize()
 		{
 			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
 			{
@@ -110,7 +110,7 @@ namespace th
 			}
 		}
 
-		static void setRenderDirection(RenderFlags rf, Axis &x, Axis &dx)
+		static void setRenderDirection(RenderFlags rf, Axis& x, Axis& dx)
 		{
 			dx = 1;
 			if (rf & RF_FLIP_X)
@@ -119,12 +119,12 @@ namespace th
 				dx = -1;
 			}
 			x -= m_columnF;
-		} 
+		}
 
-		static void renderTileFromBank(RenderFlags rf, Axis x, Axis y, TileIndx ti)
+		static void renderTileFromBank(RenderFlags rf, Axis x, Axis y, TileIndex ti)
 		{
-			uint8_t bi, bs, tb, tm; Axis &dx = y;
-			uint8_t tbs = getTileBitmapSize(); TileAddr ta;
+			Bitmap tb, tm; Axis& dx = y; TileAddr ta;
+			u08 bs, bi, tbs = getTileBitmapSize();
 			
 			if (y >= 0 && y >> 3 == m_page)
 			{
@@ -178,14 +178,14 @@ namespace th
 			if (m_renderCallback)
 			{
 				// prepare rendering configuration 
-				uint8_t pageF = m_pageR >> 0x4;
-				uint8_t pageL = m_pageR & 0x0F;
+				u08 pageF = m_pageR >> 0x4;
+				u08 pageL = m_pageR & 0x0F;
 				m_columnF = (m_columnR >> 0x8);
 				m_bufferW = (m_columnR & 0xFF) - m_columnF + 1;
 				RenderCallback renderCallback = m_renderCallback;
 
 				// prepare rendering buffer
-				uint8_t buf[1 + m_bufferW] = { 0x40 };
+				u08 buf[1 + m_bufferW] = { 0x40 };
 				m_buffer = &buf[1];
 
 				// do actual rendering page by page
@@ -207,7 +207,7 @@ namespace th
 			m_oddFrame ^= true;
 		}
 
-		void setRenderConfig(RenderCallback renderCallback, uint8_t pageRange, uint16_t columnRange)
+		void setRenderConfig(RenderCallback renderCallback, u08 pageRange, u16 columnRange)
 		{
 			// Rendering configuration may be changed at the end of rendering
 			// pipeline. In this case it will be applied on the next frame.
@@ -241,12 +241,12 @@ namespace th
 			m_asciiBase = fontBank.m_asciiBase;
 		}
 
-		void fillDisplay(uint8_t pattern)
+		void fillDisplay(u08 pattern)
 		{
 			if (!m_buffer) display::fill(pattern);
 		}
 
-		void fillRenderBuffer(uint8_t pattern)
+		void fillRenderBuffer(u08 pattern)
 		{
 			memset(m_buffer, pattern, m_bufferW);
 		}
@@ -256,7 +256,7 @@ namespace th
 			fillBufferCallback(m_columnF, m_buffer, m_bufferW);
 		}
 
-		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndx ti)
+		void renderTile(RenderFlags rf, Axis x, Axis y, TileIndex ti)
 		{
 			applyScroll(x, y);
 			renderTileFromBank(rf, x, y, ti);
@@ -268,7 +268,7 @@ namespace th
 			renderTileFromBank(rf, x, y, ch - m_asciiBase);
 		}
 
-		void renderText(RenderFlags rf, Axis x, Axis y, const char *text, uint8_t len)
+		void renderText(RenderFlags rf, Axis x, Axis y, const char *text, u08 len)
 		{
 			applyScroll(x, y);
 			if (isRenderable(y))
@@ -280,7 +280,7 @@ namespace th
 			}
 		}
 
-		void renderPattern(RenderFlags rf, Axis x, Axis y, Size w, Size h, TileIndx ti)
+		void renderPattern(RenderFlags rf, Axis x, Axis y, Size w, Size h, TileIndex ti)
 		{
 			// TODO
 		}
@@ -288,7 +288,7 @@ namespace th
 		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank& bitmap)
 		{
 			Axis yh; 
-			TileIndx ti;
+			TileIndex ti;
 			applyScroll(x, y);
 			if (isRenderable(y, h))
 			{

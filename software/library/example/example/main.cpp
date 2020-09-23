@@ -92,14 +92,14 @@ uint32_t saved_time;
 uint8_t frame_count;
 uint8_t fps;
 
-void FillBuffer(uint8_t column, uint8_t* buffer, uint8_t size)
-{
-	for (uint8_t col = column; col < column + size; ++col)
-	{
-		bool isSolid = (th::video::m_page & 0x01) ^ (col >> 3 & 0x01);
-		buffer[col - column] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::video::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
-	}
-}
+//void FillBuffer(uint8_t column, uint8_t* buffer, uint8_t size)
+//{
+	//for (uint8_t col = column; col < column + size; ++col)
+	//{
+		//bool isSolid = (th::video::m_page & 0x01) ^ (col >> 3 & 0x01);
+		//buffer[col - column] = isSolid ? ((col & 0x07) == 0 || (col & 0x07) == 7 ? 0xFF : ((col & 0x01 ^ th::video::m_oddFrame ? 0xAB : 0xD5))) : 0x00;
+	//}
+//}
 
 void RenderBackground()
 {
@@ -196,7 +196,7 @@ uint32_t millis()
 	return 0;
 }
 
-void setup()
+void init()
 {
 	saved_time = millis();
 	frame_count = 0;
@@ -205,7 +205,7 @@ void setup()
 	th::video::setRenderConfig(&RenderSequence);
 }
 
-void loop()
+void update()
 {
 	uint32_t current_time = millis();
 	if (current_time >= saved_time + 1000)
