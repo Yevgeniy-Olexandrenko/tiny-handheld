@@ -45,7 +45,7 @@ namespace th
 			{}
 
 			template<memory::Type M> 
-			TileBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format)
+			TileBank(const memory::Wrapper<M, uint8_t>* addr, u08 format)
 				: m_type(M)
 				, m_addr(addr)
 				, m_format(format)
@@ -54,13 +54,13 @@ namespace th
 			static void connect();
 			static void disconnect();
 
-			void get(TileAddr ta, uint8_t &b0) const;
-			void get(TileAddr ta, uint8_t &b0, uint8_t &b1) const;
-			void get(TileAddr ta, uint8_t &b0, uint8_t &b1, uint8_t &b2) const;
+			void get(TileAddr ta, u08& b0) const;
+			void get(TileAddr ta, u08& b0, u08& b1) const;
+			void get(TileAddr ta, u08& b0, u08& b1, u08& b2) const;
 
-			uint8_t m_type;
+			u08 m_type;
 			Address m_addr;
-			uint8_t m_format;
+			u08 m_format;
 		};
 
 		struct FontBank : TileBank
@@ -71,12 +71,12 @@ namespace th
 			{}
 
 			template<memory::Type M> 
-			FontBank(const memory::Wrapper<M, uint8_t>* addr, uint8_t format, uint8_t asciiBase)
+			FontBank(const memory::Wrapper<M, uint8_t>* addr, u08 format, u08 asciiBase)
 				: TileBank(addr, format)
 				, m_asciiBase(asciiBase)
 			{}
 
-			uint8_t m_asciiBase;
+			u08 m_asciiBase;
 		};
 	}
 }
