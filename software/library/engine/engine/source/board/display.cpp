@@ -1,105 +1,14 @@
 #include "../commons.h"
 #include "display.h"
+#include "i2c.h"
 
 #define SSD1306_COMMAND 0x00
 #define SSD1306_DATA    0x40
-
-#if F_CPU > 8000000L
- // compiles to cbi instruction taking 2 clock cycles, extending the clock pulse
-#define I2C_CLK_LOW() I2CPORT &= ~(1 << BB_SCL)
-#else
-// setting a port instruction takes 1 clock cycle
-#define I2C_CLK_LOW() I2CPORT = bOld 
-#endif
 
 namespace th
 {
 	namespace display
 	{
-		static void i2cWrite(uint8_t b)
-		{
-			uint8_t i;
-			uint8_t bOld = I2CPORT & ~(1 << BB_SDA | 1 << BB_SCL);
-
-			for (i = 0; i < 8; i++)
-			{
-				bOld &= ~(1 << BB_SDA);
-				if (b & 0x80) bOld |= (1 << BB_SDA);
-
-				I2CPORT = bOld;
-				I2CPORT |= (1 << BB_SCL);
-				I2C_CLK_LOW();
-				b <<= 1;
-			}
-			I2CPORT = bOld & ~(1 << BB_SDA);
-			I2CPORT |= (1 << BB_SCL);
-			I2C_CLK_LOW();
-		}
-
-		static void i2cWrite(uint8_t *pData, uint8_t bLen)
-		{
-			uint8_t i, b;
-			uint8_t bOld = I2CPORT & ~(1 << BB_SDA | 1 << BB_SCL);
-
-			while (bLen--)
-			{
-				b = *pData++;
-				if (b == 0x00 || b == 0xff)
-				{
-					// special case can save time
-					bOld &= ~(1 << BB_SDA);
-					if (b) bOld |= (1 << BB_SDA);
-
-					I2CPORT = bOld;
-					for (i = 0; i < 8; i++)
-					{
-						// just toggle SCL, SDA stays the same
-						I2CPORT |= (1 << BB_SCL);
-						I2C_CLK_LOW();
-					}
-				}
-				else
-				{
-					// normal byte needs every bit tested
-					for (i = 0; i < 8; i++)
-					{
-
-						bOld &= ~(1 << BB_SDA);
-						if (b & 0x80) bOld |= (1 << BB_SDA);
-
-						I2CPORT = bOld;
-						I2CPORT |= (1 << BB_SCL);
-						I2C_CLK_LOW();
-						b <<= 1;
-					}
-				}
-
-				// ACK bit seems to need to be set to 0, but SDA line doesn't need to be tri-state
-				I2CPORT &= ~(1 << BB_SDA);
-				I2CPORT |=  (1 << BB_SCL);
-				I2CPORT &= ~(1 << BB_SCL);
-			}
-		}
-
-		static void i2cBegin(uint8_t addr)
-		{
-			I2CPORT |=  (1 << BB_SDA | 1 << BB_SCL);
-			I2CDDR  |=  (1 << BB_SDA | 1 << BB_SCL);
-			I2CPORT &= ~(1 << BB_SDA);
-			I2CPORT &= ~(1 << BB_SCL);
-			i2cWrite(addr);
-		}
-
-		static void i2cEnd()
-		{
-			I2CPORT &= ~(1 << BB_SDA);
-			I2CPORT |=  (1 << BB_SCL);
-			I2CPORT |=  (1 << BB_SDA);
-			I2CDDR  &= ~(1 << BB_SDA | 1 << BB_SCL);
-		}
-
-		////////////////////////////////////////////////////////////////////////
-
 		const uint8_t oled_initbuf[] PROGMEM =
 		{
 #if 1
@@ -136,12 +45,12 @@ namespace th
 			_delay_ms(40);
 
 			// Send initialization sequence
-			i2cBegin(SSD1306_SA);
+			i2c::begin(SSD1306_SA);
 			for (uint8_t i = 0; i < sizeof(oled_initbuf); i++)
 			{
-				i2cWrite(pgm_read_byte(&oled_initbuf[i]));
+				i2c::write(pgm_read_byte(&oled_initbuf[i]));
 			}
-			i2cEnd();
+			i2c::end();
 
 #if 0
 			uint8_t uc[4];
@@ -172,9 +81,9 @@ namespace th
 
 		void writeBuf(uint8_t *buf, uint8_t size)
 		{
-			i2cBegin(SSD1306_SA);
-			i2cWrite(buf, size);
-			i2cEnd();
+			i2c::begin(SSD1306_SA);
+			i2c::write(buf, size);
+			i2c::end();
 		}
 
 		////////////////////////////////////////////////////////////////////////

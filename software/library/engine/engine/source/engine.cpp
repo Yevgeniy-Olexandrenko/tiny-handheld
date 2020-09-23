@@ -79,7 +79,6 @@ namespace th
 		{
 			cli();
 			mcu::wdtDisable();
-			set_sleep_mode(SLEEP_MODE_IDLE);
 			mcu::wdtEnable(WDT_MODE_INT, WDT_TIMEOUT_16MS);
 			m_frame.scale_f = 0;
 			if (fps)
@@ -88,11 +87,13 @@ namespace th
 				set_bit(m_frame.scale_f, F_FSYNC_BIT);
 			}
 			reloadFrameDivider();
+			set_sleep_mode(SLEEP_MODE_IDLE);
 			sei();		
 		}
 		
 		u32 getCurrentTimeMillis()
 		{
+			// WDT frame counter multiply by 16ms per WDT frame
 			return (m_frame.count_h << 16 | m_frame.count_l) << 4;
 		}
 	}
