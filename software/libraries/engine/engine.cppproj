@@ -191,6 +191,18 @@
     <Compile Include="source\memory.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="source\memory\EEPROM.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="source\memory\EEWrap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="source\memory\PGMWrap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="source\memory\storage.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="source\sound.cpp">
       <SubType>compile</SubType>
     </Compile>
@@ -208,6 +220,7 @@
     <Folder Include="source" />
     <Folder Include="source\assets" />
     <Folder Include="source\board" />
+    <Folder Include="source\memory" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>
