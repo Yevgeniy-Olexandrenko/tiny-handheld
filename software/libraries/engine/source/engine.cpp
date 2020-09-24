@@ -94,7 +94,7 @@ namespace th
 		u32 getCurrentTimeMillis()
 		{
 			// WDT frame counter multiply by 16ms per WDT frame
-			return (m_frame.count_h << 16 | m_frame.count_l) << 4;
+			return ((u32)m_frame.count_h << 16 | (u32)m_frame.count_l) << 4;
 		}
 	}
 }
@@ -110,9 +110,8 @@ ISR(WDT_vect)
 	}
 }
 
-int main(void)
+int main()
 {
 	th::engine::init();
 	for (;;) th::engine::update();
-	return 0;
 }

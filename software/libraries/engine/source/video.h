@@ -18,20 +18,24 @@ namespace th
 		extern Axis m_scrollX;
 		extern Axis m_scrollY;
 		
-		typedef u08 RenderFlags;
-		const RenderFlags RF_FLIP_X  = 0x80;
-		const RenderFlags RF_FLIP_Y  = 0x40;
-		const RenderFlags RF_TRANSP  = 0x20;
-		const RenderFlags RF_INVERSE = 0x10;
-		const RenderFlags RF_EMPTY   = 0x00;
+		typedef u08 RenderFlags; enum 
+		{
+			RF_FLIP_X  = 0x80,
+			RF_FLIP_Y  = 0x40,
+			RF_TRANSP  = 0x20,
+			RF_INVERSE = 0x10,
+			RF_EMPTY   = 0x00
+		};
 
-		typedef u08 TileFormat;
-		const TileFormat TF_BM             = 0x00;
-		const TileFormat TF_BM_MSKBM       = 0x40;
-		const TileFormat TF_BM_ODDBM       = 0x80;
-		const TileFormat TF_BM_MSKBM_ODDBM = 0xC0;
-		const TileFormat TF_BITS_FOR_TYPE  = 0xC0;
-		const TileFormat TF_BITS_FOR_WIDTH = 0x3F;
+		typedef u08 TileFormat; enum
+		{
+			TF_BM             = 0x00,
+			TF_BM_MSKBM       = 0x40,
+			TF_BM_ODDBM       = 0x80,
+			TF_BM_MSKBM_ODDBM = 0xC0,
+			TF_BITS_FOR_TYPE  = 0xC0,
+			TF_BITS_FOR_WIDTH = 0x3F
+		};
 
 		void init();
 		void update();
