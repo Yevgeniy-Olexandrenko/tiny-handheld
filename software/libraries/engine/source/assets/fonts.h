@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../video.h"
+#include "details/video.h"
 
 #include "font6x8.h"
 #include "font6x8caps.h"

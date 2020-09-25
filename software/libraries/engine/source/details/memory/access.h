@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../board/eeprom.h"
+#include "board/eeprom.h"
 
 namespace th
 {

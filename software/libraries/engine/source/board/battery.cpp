@@ -1,4 +1,4 @@
-#include "../commons.h"
+#include "commons.h"
 #include "battery.h"
 
 #define MIN_BAT_VOLTAGE 2000 // 2.0V

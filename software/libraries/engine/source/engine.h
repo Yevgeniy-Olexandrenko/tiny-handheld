@@ -11,9 +11,9 @@
 #include "board/mcu.h"
 
 // High level hardware support
-#include "memory.h"
-#include "video.h"
-#include "sound.h"
+#include "details/memory.h"
+#include "details/video.h"
+#include "details/sound.h"
 
 namespace th
 {

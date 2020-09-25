@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../video.h"
+#include "details/video.h"
 
 namespace th
 {

@@ -1,4 +1,4 @@
-#include "../commons.h"
+#include "commons.h"
 #include "mcu.h"
 
 #if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__)

@@ -1,4 +1,4 @@
-#include "../commons.h"
+#include "commons.h"
 #include "i2c.h"
 
 #define SCL_LO() I2C_PORT &= ~_BV(I2C_SCL)
