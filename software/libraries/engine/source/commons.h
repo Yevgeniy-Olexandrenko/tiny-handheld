@@ -19,6 +19,14 @@
 #define is_bit_set(sfr, bit) ((sfr) & _BV(bit))
 #define is_bit_clear(sfr, bit) (!((sfr) & _BV(bit)))
 
+// Select different types based on a condition, an 'if statement' for types.
+template< bool V, typename T, typename F > struct select { typedef T type; };
+template< typename T, typename F > struct select< false, T, F > { typedef F type; };
+
+// A basic comparison of two types
+template < typename T, typename U > struct is_same { enum { value = false }; };
+template < typename T > struct is_same< T, T > { enum { value = true }; };
+
 typedef int8_t   s08;
 typedef uint8_t  u08;
 typedef int16_t  s16;

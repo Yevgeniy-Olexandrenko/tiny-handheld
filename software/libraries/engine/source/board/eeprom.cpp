@@ -38,27 +38,37 @@ namespace th
 
 		void update() {}
 
-		uint8_t readByte(uint16_t addr)
+		uint8_t readByte(uint16_t src)
 		{
-			if (!m_comm || addr != m_addr)
+			if (!m_comm || src != m_addr)
 			{
 				stopCommunication();
-				startCommunication(addr);
+				startCommunication(src);
 			}
 			return readNextByte();
 		}
 
-		void readBlock(uint16_t addr, uint8_t *dest, size_t n)
+		void readBlock(uint16_t src, uint8_t* dst, size_t size)
 		{
-			if (!m_comm || addr != m_addr)
+			if (!m_comm || src != m_addr)
 			{
 				stopCommunication();
-				startCommunication(addr);
+				startCommunication(src);
 			}
-			while(n-- > 0) 
+			while(size-- > 0) 
 			{
-				(*dest++) = readNextByte();
+				(*dst++) = readNextByte();
 			}
+		}
+
+		void writeByte(uint16_t dst, uint8_t data)
+		{
+			//
+		}
+
+		void writeBlock(const uint8_t* src, uint16_t dst, size_t size)
+		{
+			//
 		}
 	}
 }
