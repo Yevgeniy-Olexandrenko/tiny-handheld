@@ -79,13 +79,13 @@ bool IsCenter() { return bitRead(PINB, PB3) == LOW; }
 
 // The bitmaps for the little images of next block
 static const byte miniBlock[][4] PROGMEM = {
-    {0x77, 0x77, 0x00, 0x00}, 
-    {0x70, 0x77, 0x70, 0x00}, 
-    {0x70, 0x00, 0x70, 0x77}, 
-    {0x70, 0x07, 0x70, 0x07}, 
-    {0x70, 0x07, 0x00, 0xEE}, 
-    {0x70, 0x77, 0x00, 0x0E}, 
-    {0x70, 0x07, 0xEE, 0x00}
+    {0xEE, 0xEE, 0x00, 0x00}, 
+    {0xE0, 0xEE, 0xE0, 0x00}, 
+    {0xE0, 0x00, 0xE0, 0xEE}, 
+    {0xE0, 0x0E, 0xE0, 0x0E}, 
+    {0xE0, 0x0E, 0x00, 0xEE}, 
+    {0xE0, 0xEE, 0x00, 0x0E}, 
+    {0x00, 0xEE, 0xE0, 0x0E}
     };
 
 // The bitmaps for the main blocks
@@ -372,16 +372,17 @@ void ssd1306_send_data_stop(void) {
 
 void ssd1306_setpos(uint8_t x, uint8_t y)
 {
-  if (y > 7) return;
-  ssd1306_xfer_start();
-  ssd1306_send_byte(SSD1306_SA);  //Slave address,SA0=0
-  ssd1306_send_byte(0x00);  //write command
+	if (y > 7) return;
 
-  ssd1306_send_byte(0xb0 + y);
-  ssd1306_send_byte(((x & 0xf0) >> 4) | 0x10); // |0x10
-  ssd1306_send_byte((x & 0x0f) | 0x01); // |0x01
+	ssd1306_xfer_start();
+	ssd1306_send_byte(SSD1306_SA);
+	ssd1306_send_byte(0x00);
 
-  ssd1306_xfer_stop();
+	ssd1306_send_byte(0xb0 | y);
+	ssd1306_send_byte(0x00 | (x & 0x0F));
+	ssd1306_send_byte(0x10 | (x >> 4 & 0x0F));
+
+	ssd1306_xfer_stop();
 }
 
 void ssd1306_fillscreen(uint8_t fill_Data) {
@@ -640,7 +641,7 @@ bool movePieceDown(void) {
       case 4:   score += 800; 
     }
     drawGameScreen(0,10, 0,VERTDRAW,FULL); 
-    displayScore(score, 0,117,0);
+    displayScore(score, 0, 128 - 8, 0);
     loadPiece(nextPiece, STARTY, STARTX);
     if (checkCollision()) {
       stopAnimate = true;
@@ -762,21 +763,13 @@ void setNextBlock(byte pieceNumber) {
   beep(20, 956);
   memset(nextBlockBuffer, 0, sizeof nextBlockBuffer); //clear buffer
   pieceNumber--;
-  if (pieceNumber == 0) {
-      for (int k = 2; k < 6; k++) {
-        nextBlockBuffer[k][0] = pgm_read_byte(&miniBlock[pieceNumber][0]);
-        nextBlockBuffer[k][1] = pgm_read_byte(&miniBlock[pieceNumber][0]);
-      }
-  
-  } else {  
-      for (int k = 0; k < 3; k++) {
-        nextBlockBuffer[k][0] = pgm_read_byte(&miniBlock[pieceNumber][0]);
-        nextBlockBuffer[k][1] = pgm_read_byte(&miniBlock[pieceNumber][1]);
-      }
-      for (int k = 4; k < 7; k++) {
-        nextBlockBuffer[k][0] = pgm_read_byte(&miniBlock[pieceNumber][2]);
-        nextBlockBuffer[k][1] = pgm_read_byte(&miniBlock[pieceNumber][3]);
-      }
+  for (int k = 1; k < 4; k++) {
+    nextBlockBuffer[k][0] = pgm_read_byte(&miniBlock[pieceNumber][0]);
+    nextBlockBuffer[k][1] = pgm_read_byte(&miniBlock[pieceNumber][1]);
+  }
+  for (int k = 5; k < 8; k++) {
+    nextBlockBuffer[k][0] = pgm_read_byte(&miniBlock[pieceNumber][2]);
+    nextBlockBuffer[k][1] = pgm_read_byte(&miniBlock[pieceNumber][3]);
   }
   drawGameScreen(0,10,0,VERTDRAW, FULL);
 }
@@ -785,7 +778,7 @@ void drawScreenBorder(void) {
     ssd1306_setpos(0, 0);
     ssd1306_send_data_start();
     ssd1306_send_byte(0xFF);  
-    for (byte c = 1; c < 126; c++) {
+    for (byte c = 1; c < 127; c++) {
       ssd1306_send_byte(B00000001);  
     }
     ssd1306_send_byte(0xFF);  
@@ -805,30 +798,34 @@ void drawScreenBorder(void) {
     ssd1306_setpos(0, 7);
     ssd1306_send_data_start();
     ssd1306_send_byte(0xFF);  
-    for (byte c = 1; c < 126; c++) {
+    for (byte c = 1; c < 127; c++) {
       ssd1306_send_byte(B10000000);  
     }
     ssd1306_send_byte(0xFF);  
     ssd1306_send_data_stop();  
 }
 
-void displayScore(int score, int xpos, int y, bool blank) {
-  byte scoreOut[6];
-  scoreOut[5] = (score % 10);
-  scoreOut[4] = ((score / 10) % 10);
-  scoreOut[3] = ((score / 100) % 10);
-  scoreOut[2] = ((score / 1000) % 10);
-  scoreOut[1] = ((score / 10000) % 10);
-  scoreOut[0] = ((score / 100000) % 10);
+void displayScore(int score, int xpos, int y, bool blank)
+{
+	byte scoreOut[6];
+	scoreOut[5] = (score % 10);
+	scoreOut[4] = (score / 10 % 10);
+	scoreOut[3] = (score / 100 % 10);
+	scoreOut[2] = (score / 1000 % 10);
+	scoreOut[1] = (score / 10000 % 10);
+	scoreOut[0] = (score / 100000 % 10);
 
-  for (byte x = xpos; x<xpos+6; x++) {
-    ssd1306_setpos(y, x);
-    ssd1306_send_data_start();
-    for (byte lxn = 0; lxn < 8; lxn++) {    
-      if (blank) ssd1306_send_byte(0); else ssd1306_send_byte(pgm_read_byte(&font[4+scoreOut[x-xpos]][7-lxn]));      
-    }
-    ssd1306_send_data_stop();
-  }
+	for (byte x = xpos; x < xpos + 6; x++)
+	{
+		ssd1306_setpos(y, x);
+		ssd1306_send_data_start();
+		for (byte lxn = 0; lxn < 8; lxn++)
+		{
+      byte data = blank ? 0x00 : pgm_read_byte(&font[4 + scoreOut[x - xpos]][7 - lxn]) << 1;
+			ssd1306_send_byte(data);
+		}
+		ssd1306_send_data_stop();
+	}
 }
 
 void drawGameScreen(int startCol, int endCol, int startRow, int endRow, byte mode) {
@@ -844,60 +841,99 @@ void drawGameScreen(int startCol, int endCol, int startRow, int endRow, byte mod
   }
 }
 
-void drawScreen(int startCol, int endCol, int startRow, int endRow, byte mode) {
-  byte temp = 0;
-  byte separator = 0;
-  byte reader = 0;
-  byte blockReader = 0;
-  
-  if(startCol < 0) startCol = 0;
-  if(endCol > 10) endCol = 10;
-  if(startRow < 0) startRow = 0;
-  if(endRow > VERTDRAW) endRow = VERTDRAW;
-  
-  byte startScreenCol = pgm_read_byte(&startDecode[startCol]);
-  byte endScreenCol = pgm_read_byte(&endDecode[endCol]);
-  
-    for (byte col = startScreenCol; col < endScreenCol; col++) {
-    if (col < 4) reader = col; else if (col < 7) reader = col+1; else reader = col + 2;
-    blockReader = 2 * col;
-    ssd1306_setpos(startRow*6, col); // Start from the end of this column (working up the screen) on the required row
-    ssd1306_send_data_start(); 
-    if (startRow == 0) ssd1306_send_byte(B11111111); else {
-      if (col == 0) ssd1306_send_byte(B00000001); else if (col == 7) ssd1306_send_byte(B10000000); else ssd1306_send_byte(B00000000);
-    }
-    for (byte r = startRow; r < endRow; r++ ) { // For each row in the array of tetris blocks
-      for (byte piece = 0; piece < 5; piece ++) { // for each of the 5 filled lines of the block
-        if (col == 0) temp = B00000001; else if (col == 7) temp = B10000000; else temp = 0x00; // if we're on the far left, draw the left wall, on the far right draw the right wall, otherwise its a blank separator between blocks
-        separator = temp; // we'll need this again later! 
+void drawScreen(int startCol, int endCol, int startRow, int endRow, byte mode)
+{
+	byte bitmap = 0;
+	byte separator = 0;
+	byte reader = 0;
+	byte blockReader = 0;
 
-        if (readBlockArray(reader,r)) { 
-          temp = temp | pgm_read_byte(&blockout[blockReader]);
-        }
-        if (readBlockArray(reader+1,r)) { 
-          temp = temp | pgm_read_byte(&blockout[blockReader+1]);
-        }
+	if (startCol < 0) startCol = 0;
+	if (endCol > 10) endCol = 10;
+	if (startRow < 0) startRow = 0;
+	if (endRow > VERTDRAW) endRow = VERTDRAW;
 
-        if(ghost) {
-          if (readGhostArray(reader,r) && (piece == 0 || piece == 4)) { 
-            temp = temp | pgm_read_byte(&blockout[blockReader]);
-          } else if (readGhostArray(reader,r)) { 
-            temp = temp | pgm_read_byte(&ghostout[blockReader]);
-          }
-                
-          if (readGhostArray(reader+1,r) && (piece == 0 || piece == 4)) { 
-            temp = temp | pgm_read_byte(&blockout[blockReader+1]);
-          } else if (readGhostArray(reader+1,r)) { 
-            temp = temp | pgm_read_byte(&ghostout[blockReader+1]);
-          }
-        }
-        ssd1306_send_byte(temp);          
-      }
-      ssd1306_send_byte(separator); // between blocks - same one as we used at the start
-    }    
-    if (mode == FULL) if (col > 5) for (byte blockline = 0; blockline < 8; blockline++) ssd1306_send_byte(nextBlockBuffer[blockline][col-6]);
-    ssd1306_send_data_stop(); 
-  }
+	byte startScreenCol = pgm_read_byte(&startDecode[startCol]);
+	byte endScreenCol = pgm_read_byte(&endDecode[endCol]);
+
+	for (byte col = startScreenCol; col < endScreenCol; col++)
+	{
+		reader = col < 4 ? col : (col < 7 ? col + 1 : col + 2);
+		blockReader = col * 2;
+
+		// if we're on the far left, draw the left wall, on the far right draw
+		// the right wall, otherwise its a blank separator between blocks
+		separator = (col == 0 ? 0x02 : (col == 7 ? 0x80 : 0x00));
+
+		if (startRow == 0)
+		{
+			ssd1306_setpos(0, col);
+			ssd1306_send_data_start();
+			ssd1306_send_byte(col == 0 ? 0xFE : 0xFF);
+			ssd1306_send_byte(separator);
+		}
+		else
+		{
+			ssd1306_setpos(2 + startRow * 6, col);
+			ssd1306_send_data_start();
+		}
+
+		for (byte r = startRow; r < endRow; r++)
+		{
+			for (byte piece = 0; piece < 5; piece++)
+			{
+				bitmap = separator;
+				if (readBlockArray(reader, r))
+				{
+					bitmap |= pgm_read_byte(&blockout[blockReader]);
+				}
+				if (readBlockArray(reader + 1, r))
+				{
+					bitmap |= pgm_read_byte(&blockout[blockReader + 1]);
+				}
+
+				if (ghost)
+				{
+					if (readGhostArray(reader, r) && (piece == 0 || piece == 4))
+					{
+						bitmap |= pgm_read_byte(&blockout[blockReader]);
+					}
+					else if (readGhostArray(reader, r))
+					{
+						bitmap |= pgm_read_byte(&ghostout[blockReader]);
+					}
+
+					if (readGhostArray(reader + 1, r) && (piece == 0 || piece == 4))
+					{
+						bitmap |= pgm_read_byte(&blockout[blockReader + 1]);
+					}
+					else if (readGhostArray(reader + 1, r))
+					{
+						bitmap |= pgm_read_byte(&ghostout[blockReader + 1]);
+					}
+				}
+				ssd1306_send_byte(bitmap);
+			}
+			ssd1306_send_byte(separator);
+		}
+
+		if (endRow == VERTDRAW)
+		{
+			ssd1306_send_byte(col == 0 ? 0xFE : 0xFF);
+		}
+    ssd1306_send_data_stop();
+
+		if (mode == FULL && col > 5)
+		{
+      ssd1306_setpos(128 - 8, col);
+      ssd1306_send_data_start();
+			for (byte blockline = 0; blockline < 8; blockline++)
+			{
+				ssd1306_send_byte(nextBlockBuffer[blockline][col - 6]);
+			}
+      ssd1306_send_data_stop();
+		}
+	}
 }
 
 bool createGhost(void) {
@@ -982,7 +1018,7 @@ void playTetris(void) {
   level = STARTLEVEL;
   
   drawGameScreen(0,10,0,VERTDRAW, FULL); 
-  displayScore(score, 0,117,0);
+  displayScore(score, 0, 128 - 8, 0);
   
   while (stopAnimate == 0) {
     drawPiece(ERASE);
