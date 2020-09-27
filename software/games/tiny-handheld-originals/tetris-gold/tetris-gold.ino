@@ -637,13 +637,15 @@ bool movePieceDown(void) {
       }
     }
     level += totalRows;
-    switch (totalRows) {
-      case 1:   score += 40; break;
-      case 2:   score += 100; break;
-      case 3:   score += 300; break;
-      case 4:   score += 800; 
-    }
-    drawGameScreen(0,10, 0,VERTDRAW,FULL); 
+	switch (totalRows)
+	{
+	default: score += 5; break;
+	case  1: score += 40; break;
+	case  2: score += 100; break;
+	case  3: score += 300; break;
+	case  4: score += 800; break;
+	}
+	drawGameScreen(0,10, 0,VERTDRAW,FULL); 
     displayScore(score, 0, 128 - 8, 0);
     loadPiece(nextPiece, STARTY, STARTX);
     if (checkCollision()) {
