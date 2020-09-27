@@ -79,21 +79,24 @@ bool IsCenter() { return bitRead(PINB, PB3) == LOW; }
 
 // The bitmaps for the little images of next block
 static const byte miniBlock[][4] PROGMEM = {
-    {0xEE, 0xEE, 0x00, 0x00}, 
-    {0xE0, 0xEE, 0xE0, 0x00}, 
-    {0xE0, 0x00, 0xE0, 0xEE}, 
-    {0xE0, 0x0E, 0xE0, 0x0E}, 
-    {0xE0, 0x0E, 0x00, 0xEE}, 
-    {0xE0, 0xEE, 0x00, 0x0E}, 
-    {0x00, 0xEE, 0xE0, 0x0E}
-    };
+	{0xEE, 0xEE, 0x00, 0x00}, // I
+	{0xE0, 0xEE, 0xE0, 0x00}, // J
+	{0xE0, 0xEE, 0x00, 0xE0}, // L
+	{0xE0, 0x0E, 0xE0, 0x0E}, // O
+	{0xE0, 0x0E, 0x00, 0xEE}, // S
+	{0xE0, 0xEE, 0x00, 0x0E}, // T
+	{0x00, 0xEE, 0xE0, 0x0E}, // Z
+};
 
 // The bitmaps for the main blocks
 static const int blocks[7] PROGMEM = {
-  0x4444, 0x44C0, 
-  0x4460, 0x0660, 
-  0x06C0, 0x0E40, 
-  0x0C60
+	0x4444, // I
+	0x4460, // J
+	0x44C0, // L
+	0x0660, // O
+	0x0C60, // S
+	0x04E0, // T
+	0x4620, // Z
 };
 
 // The bitmaps for blocks on the screen
@@ -952,21 +955,18 @@ bool createGhost(void) {
   if (ghostPiece.row > currentPiece.row - 3) return 0; else return 1;
 }
 
-void loadPiece(byte pieceNumber, byte row, byte column) {
-  byte incr = 0;
-
-  pieceNumber--;
-  
-  for (byte lxn = 0; lxn < 4; lxn++) {
-    for (byte lxn2 = 0; lxn2 < 4; lxn2++) {
-      if ( ((1 << incr) & pgm_read_word(&blocks[pieceNumber])) >> incr == 1) {
-        currentPiece.blocks[lxn][lxn2] = 1;                
-      } else currentPiece.blocks[lxn][lxn2] = 0;
-      incr++;
-    }
-  }
-  currentPiece.row = row;
-  currentPiece.column = column;
+void loadPiece(byte pieceNumber, byte row, byte column)
+{
+	unsigned int block = pgm_read_word(&blocks[--pieceNumber]);
+	for (byte y = 0; y < 4; y++)
+	{
+		for (byte x = 0; x < 4; x++, block >>= 1)
+		{
+			currentPiece.blocks[x][y] = (block & 1);
+		}
+	}
+	currentPiece.row = row;
+	currentPiece.column = column;
 }
 
 void drawPiece(byte action) {
