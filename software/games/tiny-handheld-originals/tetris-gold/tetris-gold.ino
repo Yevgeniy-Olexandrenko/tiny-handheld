@@ -926,17 +926,17 @@ void drawScreen(int startCol, int endCol, int startRow, int endRow, byte mode)
 		{
 			ssd1306_send_byte(col == 0 ? 0xFE : 0xFF);
 		}
-    ssd1306_send_data_stop();
+		ssd1306_send_data_stop();
 
 		if (mode == FULL && col > 5)
 		{
-      ssd1306_setpos(128 - 8, col);
-      ssd1306_send_data_start();
+			ssd1306_setpos(128 - 8, col);
+			ssd1306_send_data_start();
 			for (byte blockline = 0; blockline < 8; blockline++)
 			{
 				ssd1306_send_byte(nextBlockBuffer[blockline][col - 6]);
 			}
-      ssd1306_send_data_stop();
+			ssd1306_send_data_stop();
 		}
 	}
 }
