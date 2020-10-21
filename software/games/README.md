@@ -1,6 +1,7 @@
 # Tiny Joypad originals and community
-![tiny-arkanoid-v2.0](/software/games/tiny-joypad/tiny-arkanoid-v2.0/tiny-arkanoid-v2.0.png)
-![tiny-bert-v1.1](/software/games/tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.png)
+[![](./tiny-joypad/tiny-arkanoid-v2.0/tiny-arkanoid-v2.0.png)](./tiny-joypad/tiny-arkanoid-v2.0/tiny-arkanoid-v2.0.hex)
+
+![tiny-bert-v1.1](./tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.png)
 ![tiny-bike-v1.2](/software/games/tiny-joypad/tiny-bike-v1.2/tiny-bike-v1.2.png)
 ![tiny-bomber-v1.3](/software/games/tiny-joypad/tiny-bomber-v1.3/tiny-bomber-v1.3.png)
 ![tiny-ddug-v1.0](/software/games/tiny-joypad/tiny-ddug-v1.0/tiny-ddug-v1.0.png)
