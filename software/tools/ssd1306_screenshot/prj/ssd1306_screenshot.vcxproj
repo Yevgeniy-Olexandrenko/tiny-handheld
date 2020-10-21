@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\lib\lpng\png.c" />
+    <ClCompile Include="..\lib\lpng\pngerror.c" />
+    <ClCompile Include="..\lib\lpng\pnggccrd.c" />
+    <ClCompile Include="..\lib\lpng\pngget.c" />
+    <ClCompile Include="..\lib\lpng\pngmem.c" />
+    <ClCompile Include="..\lib\lpng\pngpread.c" />
+    <ClCompile Include="..\lib\lpng\pngread.c" />
+    <ClCompile Include="..\lib\lpng\pngrio.c" />
+    <ClCompile Include="..\lib\lpng\pngrtran.c" />
+    <ClCompile Include="..\lib\lpng\pngrutil.c" />
+    <ClCompile Include="..\lib\lpng\pngset.c" />
+    <ClCompile Include="..\lib\lpng\pngtrans.c" />
+    <ClCompile Include="..\lib\lpng\pngvcrd.c" />
+    <ClCompile Include="..\lib\lpng\pngwio.c" />
+    <ClCompile Include="..\lib\lpng\pngwrite.c" />
+    <ClCompile Include="..\lib\lpng\pngwtran.c" />
+    <ClCompile Include="..\lib\lpng\pngwutil.c" />
+    <ClCompile Include="..\lib\zlib\adler32.c" />
+    <ClCompile Include="..\lib\zlib\compress.c" />
+    <ClCompile Include="..\lib\zlib\crc32.c" />
+    <ClCompile Include="..\lib\zlib\deflate.c" />
+    <ClCompile Include="..\lib\zlib\gzclose.c" />
+    <ClCompile Include="..\lib\zlib\gzlib.c" />
+    <ClCompile Include="..\lib\zlib\gzread.c" />
+    <ClCompile Include="..\lib\zlib\gzwrite.c" />
+    <ClCompile Include="..\lib\zlib\infback.c" />
+    <ClCompile Include="..\lib\zlib\inffast.c" />
+    <ClCompile Include="..\lib\zlib\inflate.c" />
+    <ClCompile Include="..\lib\zlib\inftrees.c" />
+    <ClCompile Include="..\lib\zlib\trees.c" />
+    <ClCompile Include="..\lib\zlib\uncompr.c" />
+    <ClCompile Include="..\lib\zlib\zutil.c" />
+    <ClCompile Include="..\src\Image.cpp" />
+    <ClCompile Include="..\src\ssd1306_screenshot.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\lib\lpng\png.h" />
+    <ClInclude Include="..\lib\lpng\pngconf.h" />
+    <ClInclude Include="..\lib\pngpp\color.hpp" />
+    <ClInclude Include="..\lib\pngpp\config.hpp" />
+    <ClInclude Include="..\lib\pngpp\consumer.hpp" />
+    <ClInclude Include="..\lib\pngpp\convert_color_space.hpp" />
+    <ClInclude Include="..\lib\pngpp\end_info.hpp" />
+    <ClInclude Include="..\lib\pngpp\error.hpp" />
+    <ClInclude Include="..\lib\pngpp\ga_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\generator.hpp" />
+    <ClInclude Include="..\lib\pngpp\gray_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\image.hpp" />
+    <ClInclude Include="..\lib\pngpp\image_info.hpp" />
+    <ClInclude Include="..\lib\pngpp\index_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\info.hpp" />
+    <ClInclude Include="..\lib\pngpp\info_base.hpp" />
+    <ClInclude Include="..\lib\pngpp\io_base.hpp" />
+    <ClInclude Include="..\lib\pngpp\packed_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\palette.hpp" />
+    <ClInclude Include="..\lib\pngpp\pixel_buffer.hpp" />
+    <ClInclude Include="..\lib\pngpp\pixel_traits.hpp" />
+    <ClInclude Include="..\lib\pngpp\png.hpp" />
+    <ClInclude Include="..\lib\pngpp\reader.hpp" />
+    <ClInclude Include="..\lib\pngpp\require_color_space.hpp" />
+    <ClInclude Include="..\lib\pngpp\rgba_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\rgb_pixel.hpp" />
+    <ClInclude Include="..\lib\pngpp\solid_pixel_buffer.hpp" />
+    <ClInclude Include="..\lib\pngpp\streaming_base.hpp" />
+    <ClInclude Include="..\lib\pngpp\tRNS.hpp" />
+    <ClInclude Include="..\lib\pngpp\types.hpp" />
+    <ClInclude Include="..\lib\pngpp\writer.hpp" />
+    <ClInclude Include="..\lib\zlib\crc32.h" />
+    <ClInclude Include="..\lib\zlib\deflate.h" />
+    <ClInclude Include="..\lib\zlib\gzguts.h" />
+    <ClInclude Include="..\lib\zlib\inffast.h" />
+    <ClInclude Include="..\lib\zlib\inffixed.h" />
+    <ClInclude Include="..\lib\zlib\inflate.h" />
+    <ClInclude Include="..\lib\zlib\inftrees.h" />
+    <ClInclude Include="..\lib\zlib\trees.h" />
+    <ClInclude Include="..\lib\zlib\zconf.h" />
+    <ClInclude Include="..\lib\zlib\zlib.h" />
+    <ClInclude Include="..\lib\zlib\zutil.h" />
+    <ClInclude Include="..\src\Image.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{4d59a863-38c9-4971-8671-5d7fecce065d}</ProjectGuid>
+    <RootNamespace>ssd1306screenshot</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\zlib;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\pngpp;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\lpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\zlib;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\pngpp;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\lpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\zlib;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\pngpp;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\lpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\zlib;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\pngpp;E:\projects\github\tiny-handheld\software\tools\ssd1306_screenshot\lib\lpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
