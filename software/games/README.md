@@ -16,8 +16,12 @@
 ![tiny-tris-v2.0](/software/games/tiny-joypad/tiny-tris-v2.0/tiny-tris-v2.0.png)
 
 # ATTiny Arcade ports
-![attiny-tetris-gold](/software/games/attiny-arcade/attiny-tetris-gold/attiny-tetris-gold.jpg)
+![attiny-tetris-gold](/software/games/attiny-arcade/attiny-tetris-gold/attiny-tetris-gold.png)
+![bat-bonanza](/software/games/attiny-arcade/bat-bonanza/bat-bonanza.png)
+![four-in-row](/software/games/attiny-arcade/four-in-row/four-in-row.png)
+![frogger](/software/games/attiny-arcade/frogger/frogger.png)
 
 # Tiny Handheld reworks and originals
-![tetris-gold](/software/games/tiny-handheld/tetris-gold/tetris-gold.jpg)
-![hidiot-2048](/software/games/tiny-handheld/hidiot-2048/hidiot-2048.jpg)
+![hidiot-2048](/software/games/tiny-handheld/hidiot-2048/hidiot-2048.png)
+![tetris-gold](/software/games/tiny-handheld/tetris-gold/tetris-gold.png)
+
