@@ -21,4 +21,4 @@ Games created by community:
 # Tiny Handheld reworks and originals
  1 | 2
 :-:|:-:
-[![](./tiny-handheld/hidiot-2048/hidiot-2048.png "hidiot-2048")](./tiny-handheld/hidiot-2048/hidiot-2048.hex) | [![](./tiny-handheld/tetris-gold/tetris-gold.png "tetris-gold")](./tiny-handheld/tetris-gold/tetris-gold.hex)
+[![](./tiny-handheld/tetris-gold/tetris-gold.png "tetris-gold")](./tiny-handheld/tetris-gold/tetris-gold.hex) | [![](./tiny-handheld/hidiot-2048/hidiot-2048.png "hidiot-2048")](./tiny-handheld/hidiot-2048/hidiot-2048.hex)
