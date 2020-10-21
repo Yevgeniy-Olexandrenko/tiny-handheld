@@ -1,6 +1,6 @@
 # Tiny Joypad originals
-![tiny-arkanoid-v2.0](tiny-joypad/tiny-arkanoid-v2.0/tiny-arkanoid-v2.0.jpg)
-![tiny-bert-v1.1](tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.jpg)
+![tiny-arkanoid-v2.0](/software/games/tiny-joypad/tiny-arkanoid-v2.0/tiny-arkanoid-v2.0.jpg)
+![tiny-bert-v1.1](/software/games/tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.jpg)
 
 
 # ATTiny Arcade ports
