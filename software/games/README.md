@@ -7,9 +7,9 @@ Games created by **Daniel C**:
 [![](./tiny-joypad/tiny-pacman-v1.2/tiny-pacman-v1.2.png "tiny-pacman-v1.2")](./tiny-joypad/tiny-pacman-v1.2/tiny-pacman-v1.2.hex) | [![](./tiny-joypad/tiny-invaders-v3.1/tiny-invaders-v3.1.png "tiny-invaders-v3.1")](./tiny-joypad/tiny-invaders-v3.1/tiny-invaders-v3.1.hex) | [![](./tiny-joypad/tiny-pinball-v2.0/tiny-pinball-v2.0.png "tiny-pinball-v2.0")](./tiny-joypad/tiny-pinball-v2.0/tiny-pinball-v2.0.hex) | [![](./tiny-joypad/tiny-gilbert-v2.0/tiny-gilbert-v2.0.png "tiny-gilbert-v2.0")](./tiny-joypad/tiny-gilbert-v2.0/tiny-gilbert-v2.0.hex)
 
 Games created by community:  
- 1
-:-:
-[![](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.png "tiny-lander-v1.0")](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.hex)
+ 1 | 2
+:-:|:-:
+[![](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.png "tiny-lander-v1.0")](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.hex) | [![](./tiny-joypad/tiny-invaders-v4.2/tiny-invaders-v4.2.png "tiny-invaders-v4.2")](./tiny-joypad/tiny-invaders-v4.2/tiny-invaders-v4.2.hex)
 
 # ATTiny Arcade ports
  1 | 2 | 3 | 4 | 5
