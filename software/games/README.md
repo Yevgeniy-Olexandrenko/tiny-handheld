@@ -23,6 +23,13 @@ Games created by community:
 [![](./attiny-arcade/bat-bonanza/bat-bonanza.png)](./attiny-arcade/bat-bonanza/bat-bonanza.hex)
 [![](./attiny-arcade/four-in-row/four-in-row.png)](./attiny-arcade/four-in-row/four-in-row.hex)
 [![](./attiny-arcade/frogger/frogger.png)](./attiny-arcade/frogger/frogger.hex)
+[![](./attiny-arcade/oroboros/oroboros.png)](./attiny-arcade/oroboros/oroboros.hex)
+[![](./attiny-arcade/pacman/pacman.png)](./attiny-arcade/pacman/pacman.hex)
+[![](./attiny-arcade/run-dude-run/run-dude-run.png)](./attiny-arcade/run-dude-run/run-dude-run.hex)
+[![](./attiny-arcade/space-attack/space-attack.png)](./attiny-arcade/space-attack/space-attack.hex)
+[![](./attiny-arcade/wren-rollercoaster/wren-rollercoaster.png)](./attiny-arcade/wren-rollercoaster/wren-rollercoaster.hex)
+[![](./attiny-arcade/ufo-breakout/ufo-breakout.png)](./attiny-arcade/ufo-breakout/ufo-breakout.hex)
+[![](./attiny-arcade/ufo-stacker/ufo-stacker.png)](./attiny-arcade/ufo-stacker/ufo-stacker.hex)
 
 # Tiny Handheld reworks and originals
 [![](./tiny-handheld/hidiot-2048/hidiot-2048.png)](./tiny-handheld/hidiot-2048/hidiot-2048.hex)
