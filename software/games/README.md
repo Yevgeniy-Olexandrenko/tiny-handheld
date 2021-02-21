@@ -4,7 +4,7 @@ Games created by **Daniel C**:
 [![](./tiny-joypad/tiny-missile-v1.1/tiny-missile-v1.1.png "tiny-missile-v1.1")](./tiny-joypad/tiny-missile-v1.1/tiny-missile-v1.1.hex)
 [![](./tiny-joypad/tiny-ddug-v1.0/tiny-ddug-v1.0.png "tiny-ddug-v1.0")](./tiny-joypad/tiny-ddug-v1.0/tiny-ddug-v1.0.hex)
 [![](./tiny-joypad/tiny-plaque-v1.0/tiny-plaque-v1.0.png "tiny-plaque-v1.0")](./tiny-joypad/tiny-plaque-v1.0/tiny-plaque-v1.0.hex)
-[![](./tiny-joypad/tiny-tris-v2.0/tiny-tris-v2.0.png "tiny-tris-v2.0")](./tiny-joypad/tiny-tris-v2.0/tiny-tris-v2.0.hex)
+[![](./tiny-joypad/tiny-tris-v3.0/tiny-tris-v3.0.png "tiny-tris-v3.0")](./tiny-joypad/tiny-tris-v3.0/tiny-tris-v3.0.hex)
 [![](./tiny-joypad/tiny-trick-v1.0/tiny-trick-v1.0.png "tiny-trick-v1.0")](./tiny-joypad/tiny-trick-v1.0/tiny-trick-v1.0.hex)
 [![](./tiny-joypad/tiny-bike-v1.2/tiny-bike-v1.2.png "tiny-bike-v1.2")](./tiny-joypad/tiny-bike-v1.2/tiny-bike-v1.2.hex)
 [![](./tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.png "tiny-bert-v1.1")](./tiny-joypad/tiny-bert-v1.1/tiny-bert-v1.1.hex)
@@ -18,6 +18,8 @@ Games created by **Daniel C**:
 Games created by community:  
 [![](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.png "tiny-lander-v1.0")](./tiny-joypad/tiny-lander-v1.0/tiny-lander-v1.0.hex)
 [![](./tiny-joypad/tiny-invaders-v4.2/tiny-invaders-v4.2.png "tiny-invaders-v4.2")](./tiny-joypad/tiny-invaders-v4.2/tiny-invaders-v4.2.hex)
+[![](./tiny-joypad/hollowseeker-v0.1/hollowseeker-v0.1.png "hollowseeker-v0.1")](./tiny-joypad/hollowseeker-v0.1/hollowseeker-v0.1.hex)
+[![](./tiny-joypad/numberplace-v0.3/numberplace-v0.3.png "numberplace-v0.3")](./tiny-joypad/numberplace-v0.3/numberplace-v0.3.hex)
 
 # ATTiny Arcade ports
 [![](./attiny-arcade/attiny-tetris-gold/attiny-tetris-gold.png "attiny-tetris-gold")](./attiny-arcade/attiny-tetris-gold/attiny-tetris-gold.hex)
