@@ -1,6 +1,6 @@
-//         >>>>>  T-I-N-Y  T-R-I-S for ATTINY85  GPL v3 <<<<<
+//         >>>>>  T-I-N-Y  T-R-I-S v3 for ATTINY85  GPL v3 <<<<<
 //                     Programmer: Daniel C 2019-2020
-//               Contact EMAIL: electro_l.i.b@tinyjoypad.com
+//              Contact EMAIL: electro_l.i.b@tinyjoypad.com
 //                      https://WWW.TINYJOYPAD.COM
 //           https://sites.google.com/view/arduino-collection
 
