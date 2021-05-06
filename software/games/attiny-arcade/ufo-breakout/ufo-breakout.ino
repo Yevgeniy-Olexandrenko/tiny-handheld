@@ -53,11 +53,8 @@
 #define SSD1306XLED_H
 #define SSD1306_SCL   PORTB2  // SCL=PB2 for Tiny Joypad
 #define SSD1306_SDA   PORTB0  // SDA=PB0 for Tiny Joypad
-#define SSD1306_SA    0x78  // Slave address
+#define SSD1306_SA    0x78    // Slave address
 #define soundPin      4
-#define upDownPin     A3
-#define leftRightPin  A0
-#define firePin       1
 
 #include <EEPROM.h>
 #include "font6x8AJ.h"
@@ -71,6 +68,13 @@
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
+// Input for horizontal screen orientation
+bool IsLeft()   { return (analogRead(A0) > 750) && (analogRead(A0) < 950); }
+bool IsRight()  { return (analogRead(A0) > 500) && (analogRead(A0) < 750); }
+bool IsDown()   { return (analogRead(A3) > 750) && (analogRead(A3) < 950); }
+bool IsUp()     { return (analogRead(A3) > 500) && (analogRead(A3) < 750); }
+bool IsAction() { return bitRead(PINB, PB1) == LOW; }
+bool IsCenter() { return bitRead(PINB, PB3) == LOW; }
 
 // Function prototypes for UFO
 void beep(int,int);
@@ -133,7 +137,6 @@ boolean mute = 0;
 boolean newHigh = 0;
 int score = 0; // score - this affects the difficulty of the game
 int top = 0;
-int leftRightReading;
 
 // Interrupt handlers
 ISR(PCINT0_vect){ // PB1 pin button interrupt           
@@ -162,11 +165,11 @@ void loop() {
   gameNbr = 0;
   fireCount = 0;
   while (gameNbr == 0)  {
-    if (analogRead(upDownPin) < 950) fireCount ++;
+    if (IsUp() || IsDown()) fireCount++;
     if (fireCount > 50) {
       fireCount = 0;
-      if  (analogRead(upDownPin) > 500 && analogRead(upDownPin) <750) gameNbr = 2;  
-      if (analogRead(upDownPin) > 750 && analogRead(upDownPin)  <950) gameNbr = 1;  
+      if (IsUp()) gameNbr = 2;  
+      if (IsDown()) gameNbr = 1;  
       }
     }
   
@@ -194,11 +197,11 @@ void loop() {
   long startT = millis();
   long nowT =0;
   boolean sChange = 0;
-  while(digitalRead(firePin) == LOW) {
+  while(IsAction()) {
     nowT = millis();
     if (nowT - startT > 2000) {
       sChange = 1;     
-    if (analogRead(upDownPin) <950) {
+    if (IsUp() || IsDown()) {
         EEPROM.write(0,0);
         EEPROM.write(1,0);
         EEPROM.write(2,0);
@@ -209,7 +212,7 @@ void loop() {
     }
     if (sChange == 1) break;
   }    
-  while(digitalRead(firePin) == LOW);
+  while(IsAction());
 
 
   if (sChange == 0) {
@@ -430,12 +433,11 @@ void playUFO(void) {
   
   while (stopAnimate == 0) {
 
- // deal with inputs
-   if(digitalRead(firePin)==LOW) { 
- 
-      fire =1; fireCount = 5;
-
-    } 
+  // deal with inputs
+  if (IsAction()) { 
+    fire = 1;
+    fireCount = 5;
+  } 
 
    
   
@@ -447,7 +449,7 @@ void playUFO(void) {
   if (fireCount>0){fireCount--;}
 
   for (int boo = 0; boo<3;boo++) {
-   if (analogRead(upDownPin) <950){
+   if (IsUp() || IsDown()){
       if (playerOffset >0){
         playerOffset--; 
         flames = 1; // move player up
@@ -675,19 +677,19 @@ void playBreakout() {
 
     while (1==1) {
 
-                leftRightReading = analogRead(leftRightPin);
                 // move right
-                if ( leftRightReading>500 &&  leftRightReading<750) {
+                if (IsRight()) {
                   if (player <128-platformWidth){player++;} 
                   if (player <128-platformWidth){player++;} 
                   if (player <128-platformWidth){player++;}
-                  }
+                }
+
                 // move left
-                if ( leftRightReading>750 &&  leftRightReading<950) {
+                if (IsLeft()) {
                   if (player >0){player--;} 
                   if (player >0){player--;} 
                   if (player >0){player--;}
-                  }
+                }
                 
                 // bounce off the sides of the screen
                 if ((bally+vdir<54&&vdir==1)||(bally-vdir>1&&vdir==-1)){bally+=vdir;}else {vdir = vdir*-1;}
