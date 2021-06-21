@@ -1,4 +1,4 @@
-//         >>>>>  T-I-N-Y  T-R-I-S v2 for ATTINY85  GPL v3 <<<<<
+//         >>>>>  T-I-N-Y  T-R-I-S v3 for ATTINY85  GPL v3 <<<<<
 //                     Programmer: Daniel C 2019-2020
 //              Contact EMAIL: electro_l.i.b@tinyjoypad.com
 //                      https://WWW.TINYJOYPAD.COM
@@ -37,7 +37,12 @@ pinMode(A3,INPUT);
 ////////////////////////////////// main  ////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 void loop() {
-reset_Score_TTRIS();
+Reset_Value_TTRIS();
+if ((TINYJOYPAD_DOWN)) {
+delay(1000);
+if ((TINYJOYPAD_DOWN)) {
+save_HIGHSCORE_TTRIS();}
+}
 MENU:;
 uint8_t Rot_TTRIS=0;
 uint8_t SKIP_FRAME=0;
@@ -99,11 +104,12 @@ void INTRO_MANIFEST_TTRIS(void){
 uint8_t TIMER_1=0;
 recupe_HIGHSCORE_TTRIS();
 Convert_Nb_of_line_TTRIS();
+Flip_intro_TTRIS(&TIMER_1);
 while(1){
 PIECEs_TTRIS=PSEUDO_RND_TTRIS();
 if (BUTTON_DOWN) {reset_Score_TTRIS();break;}
 delay(33);
-TIMER_1=(TIMER_1<14)?TIMER_1+1:0;
+TIMER_1=(TIMER_1<7)?TIMER_1+1:0;
 Flip_intro_TTRIS(&TIMER_1);}
 SND_TTRIS(4); 
 }
@@ -514,6 +520,8 @@ for (x = 0; x < 128; x++){SSD1306.ssd1306_send_byte(intro_TTRIS(x,y,TIMER1));}
 SSD1306.ssd1306_send_data_stop();
 }}
 
+
+
 uint8_t intro_TTRIS(uint8_t xPASS,uint8_t yPASS,uint8_t *TIMER1){
 return (RECUPE_BACKGROUND_TTRIS(xPASS,yPASS)|
   recupe_Chateau_TTRIS(xPASS,yPASS)|
@@ -526,7 +534,7 @@ return (RECUPE_BACKGROUND_TTRIS(xPASS,yPASS)|
 }
 
 uint8_t Recupe_Start_TTRIS(uint8_t xPASS,uint8_t yPASS,uint8_t *TIMER1){
-if (*TIMER1>7) {
+if (*TIMER1>3) {
   return blitzSprite_TTRIS(49,28,xPASS,yPASS,0,start_button_1_TTRIS)|blitzSprite_TTRIS(49,36,xPASS,yPASS,0,start_button_2_TTRIS);
   }else{
     return 0;
@@ -609,34 +617,112 @@ DEPLACEMENT_XX_TTRIS=0;
 DEPLACEMENT_YY_TTRIS=0;
 }
 
+#define Number_of_Backup 4
+
 void recupe_HIGHSCORE_TTRIS(void){
-if (EEPROM.read(10)!=0b10101010){goto ED;}
-Level_TTRIS=EEPROM.read(0);
-Nb_of_line_F_TTRIS=(EEPROM.read(1)<<8);
-Nb_of_line_F_TTRIS=Nb_of_line_F_TTRIS|(EEPROM.read(2));
-Scores_TTRIS=(EEPROM.read(3)<<8);
-Scores_TTRIS=Scores_TTRIS|(EEPROM.read(4));
+uint8_t RESAVE=0;
+uint8_t t;
+
+uint8_t Level_SUM[Number_of_Backup]={0};
+uint8_t line_SUM[Number_of_Backup]={0};
+uint8_t Scores_SUM[Number_of_Backup]={0};
+
+//recupe data eeprom 
+#define Level_(tt) EEPROM.read(1+(tt*10))
+#define line_A(tt) EEPROM.read(2+(tt*10))
+#define line_B(tt) EEPROM.read(3+(tt*10))
+#define Scores_A(tt) EEPROM.read(4+(tt*10))
+#define Scores_B(tt) EEPROM.read(5+(tt*10))
+
+for (t=0;t<Number_of_Backup;t++){
+Level_SUM[t]=EEPROM.read(7+(t*10));
+line_SUM[t]=EEPROM.read(8+(t*10));
+Scores_SUM[t]=EEPROM.read(9+(t*10));
+}
+//fin
+
+//SUM check
+for (t=0;t<Number_of_Backup;t++){
+if ((checksum(Level_(t)))!=(Level_SUM[t])) {Level_SUM[t]=255;RESAVE=1;}
+if ((checksum(line_A(t))+checksum(line_B(t)))!=(line_SUM[t])) {line_SUM[t]=255;RESAVE=1;}
+if ((checksum(Scores_A(t))+checksum(Scores_B(t)))!=(Scores_SUM[t])) {Scores_SUM[t]=255;RESAVE=1;}
+}
+//SUM check fin
+
+//Get Level
+for (t=0;t<Number_of_Backup;t++){
+if (Level_SUM[t]!=255) {
+Level_TTRIS=Level_(t);
+  goto Next_2;}
+}
+goto ED;
+Next_2:;
+//get level fin
+
+//Get Lines
+for (t=0;t<Number_of_Backup;t++){
+if (line_SUM[t]!=255) {
+Nb_of_line_F_TTRIS=uint16_t (line_A(t)<<8);
+Nb_of_line_F_TTRIS|=uint16_t (line_B(t));
+goto Next_3;}
+}
+goto ED;
+Next_3:;
+//get Lines fin
+
+//Get Scores
+for (t=0;t<Number_of_Backup;t++){
+if (Scores_SUM[t]!=255) {
+Scores_TTRIS=uint16_t (Scores_A(t)<<8);
+Scores_TTRIS|=uint16_t (Scores_B(t));
+goto Next_4;}
+}
+goto ED;
+//get Scores fin
+
 ED:;
+Reset_Value_TTRIS();
+Next_4:;
+if (RESAVE) {save_HIGHSCORE_TTRIS();} //resave if sumcheck not pass
+}
+
+void Reset_Value_TTRIS(void){
+Level_TTRIS=0;
+Nb_of_line_F_TTRIS=0;
+Scores_TTRIS=0;
 }
 
 void save_HIGHSCORE_TTRIS(void){
-uint8_t TMP;
-EEPROM.write(0,Level_TTRIS);
-TMP=Nb_of_line_F_TTRIS>>8;
-EEPROM.write(1,TMP);
-TMP=(Nb_of_line_F_TTRIS<<8)>>8;
-EEPROM.write(2,TMP);
-TMP=Scores_TTRIS>>8;
-EEPROM.write(3,TMP);
-TMP=(Scores_TTRIS<<8)>>8;
-EEPROM.write(4,TMP);
-EEPROM.write(10,0b10101010);
-}
+uint8_t LEVEL_=Level_TTRIS&0xff;
+uint8_t LINE_0=(Nb_of_line_F_TTRIS>>8) & 0xFF;
+uint8_t LINE_1=Nb_of_line_F_TTRIS&0xff;
+uint8_t Scores_0=(Scores_TTRIS>>8) & 0xFF;
+uint8_t Scores_1=Scores_TTRIS&0xff;
+uint8_t t;
+for (t=0;t<Number_of_Backup;t++){
+EEPROM.write(1+(t*10),LEVEL_);
+EEPROM.write(2+(t*10),LINE_0);
+EEPROM.write(3+(t*10),LINE_1);
+EEPROM.write(4+(t*10),Scores_0);
+EEPROM.write(5+(t*10),Scores_1);
+EEPROM.write(7+(t*10),checksum(LEVEL_));
+EEPROM.write(8+(t*10),(checksum(LINE_0)+checksum(LINE_1)));
+EEPROM.write(9+(t*10),(checksum(Scores_0)+checksum(Scores_1)));
+}}
 
 void Check_NEW_RECORD(void){
-if ((Scores_TTRIS>uint16_t((EEPROM.read(3)<<8)|(EEPROM.read(4))))||(EEPROM.read(10)!=0b10101010)) {
-save_HIGHSCORE_TTRIS(); 
+if (Scores_TTRIS>uint16_t((EEPROM.read(4)<<8)|(EEPROM.read(5)))) {
+save_HIGHSCORE_TTRIS();
 }}
+
+uint8_t checksum(uint8_t Byte_){
+uint8_t Total_=0;
+uint8_t t=0;
+for (t=0;t<8;t++){
+if ((Byte_)&(0b00000001<<t)) {Total_++;}
+}
+return Total_;
+}
 
 void Sound_TTRIS(uint8_t freq_,uint8_t dur){
 for (uint8_t t=0;t<dur;t++){

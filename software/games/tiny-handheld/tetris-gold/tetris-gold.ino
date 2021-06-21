@@ -26,6 +26,7 @@
 // Standard Arduino headers
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
+#include <avr/eeprom.h>
 
 // Mode settings for functions with multiple purposes
 #define NORMAL 0
