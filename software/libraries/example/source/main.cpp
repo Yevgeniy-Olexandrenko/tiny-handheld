@@ -41,7 +41,7 @@ void RenderSprite(uint8_t x, uint8_t y)
 	rf |= th::video::RF_TRANSP;
 	//rf |= th::video::RF_INVERSE;
 
-	th::video::setTileBank(th::video::TileBank(tile_square, th::video::TF_BM_MSKBM));
+	th::video::setTileBank(tb_tile_square);
 	
 	for (uint8_t yy = 0; yy < s; ++yy)
 	{
@@ -64,22 +64,22 @@ void RenderLogo(uint8_t x, uint8_t y)
 
 void RenderSomeText(uint8_t x, uint8_t y)
 {
-	th::video::setFontBank(th::assets::fb_font4x8);
+	th::video::setFontBank(&th::assets::fb_font4x8);
 	th::video::renderText(th::video::RF_EMPTY, x, y, "Some text!", 10);
 }
 
 void RenderForeground()
 {
-	RenderSprite(x, y);
-	RenderSomeText(128 - x, y + 4);
-	RenderSprite(x + 4, 64 - y);
+	//RenderSprite(x, y);
+	//RenderSomeText(128 - x, y + 4);
+	//RenderSprite(x + 4, 64 - y);
 	RenderLogo(40, y);
 }
 
 void RenderFPS()
 {
 	uint8_t f = fps;
-	th::video::setFontBank(th::assets::fb_font6x8);
+	th::video::setFontBank(&th::assets::fb_font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
 		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 0, '0' + (f % 10));
@@ -90,7 +90,7 @@ void RenderFPS()
 void RenderBattery()
 {
 	uint8_t bat = th::battery::getPercent();
-	th::video::setFontBank(th::assets::fb_font6x8);
+	th::video::setFontBank(&th::assets::fb_font6x8);
 	for (uint8_t x = 0; x <= 12; x += 6)
 	{
 		th::video::renderChar(th::video::RF_EMPTY, 12 - x, 64-8, '0' + (bat % 10));
@@ -105,7 +105,7 @@ void RenderSequence()
 	th::video::fillRenderBuffer(0x00);
 	RenderBackground();
 	RenderForeground();
-	RenderFPS();
+//	RenderFPS();
 
 	//th::video::setRenderConfig(&RenderSequence, 0x07, 0x1F5F);
 }

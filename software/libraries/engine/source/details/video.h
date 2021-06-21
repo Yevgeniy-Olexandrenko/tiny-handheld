@@ -43,8 +43,11 @@ namespace th
 		void setRenderConfig(RenderCallback renderCallback, u08 pageRange = 0x07, u16 columnRange = 0x007F);
 		void setScrollXY(Axis sx, Axis sy);
 
-		void setTileBank(const TileBank& tileBank, Size tileWidth = 0);
-		void setFontBank(const FontBank& fontBank);
+		void setTileBank(const TileBank_f& tileBank, Size tileWidth = 0);
+		void setTileBank(const TileBank_s& tileBank, Size tileWidth = 0);
+		
+		void setFontBank(const FontBank_f* fontBank);
+		void setFontBank(const FontBank_s* fontBank);
 
 		void fillDisplay(u08 pattern);
 		void fillRenderBuffer(u08 pattern);
@@ -55,7 +58,8 @@ namespace th
 		void renderText(RenderFlags rf, Axis x, Axis y, const char *text, u08 len);
 
 		void renderPattern(RenderFlags rf, Axis x, Axis y, Size w, Size h, TileIndex ti);
-		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank& bitmap);
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank_f& bitmap);
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank_s& bitmap);
 		
 	}
 }

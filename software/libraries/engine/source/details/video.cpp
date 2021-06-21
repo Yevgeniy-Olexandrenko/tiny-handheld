@@ -6,11 +6,14 @@ namespace th
 {
 	namespace video
 	{
+		typedef u16 TileAddr;
+		
 		static RenderCallback m_renderCallback;
 		static u08 m_pageR;
 		static u16 m_columnR;
 		
-		static TileBank m_tileBank;
+		static memory::Binary m_tileBank;
+		static u08 m_tileFormat;
 		static u08 m_tileWidth;
 		static u08 m_asciiBase;
 
@@ -61,7 +64,7 @@ namespace th
 		static void fetchTileData(RenderFlags rf, TileAddr ta, Bitmap& tb, Bitmap& tm)
 		{
 			Bitmap b0, b1, b2;
-			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
+			switch (m_tileFormat & TF_BITS_FOR_TYPE)
 			{
 			default:
 				m_tileBank.get(ta, tb);
@@ -101,7 +104,7 @@ namespace th
 
 		static u08 getTileBitmapSize()
 		{
-			switch (m_tileBank.m_format & TF_BITS_FOR_TYPE)
+			switch (m_tileFormat & TF_BITS_FOR_TYPE)
 			{
 			default: return 1;
 			case TF_BM_MSKBM:
@@ -194,9 +197,9 @@ namespace th
 					m_pageY = m_page << 3;
 
 					// call same rendering pipeline for every page
-					TileBank::connect();
+					m_tileBank.startMultiAccess();
 					renderCallback();
-					TileBank::disconnect();
+					m_tileBank.stopMultiAccess();
 
 					// send buffer data to specific location on display
 					display::position(m_page, m_columnF);
@@ -222,23 +225,49 @@ namespace th
 			m_scrollY = sy;
 		}
 
-		void setTileBank(const TileBank& tileBank, Size tileWidth)
+		void setTileBank(const TileBank_f& tileBank, Size tileWidth)
 		{
-			m_tileBank  = tileBank;
-			m_tileWidth = tileBank.m_format & TF_BITS_FOR_WIDTH;
-
+			m_tileBank = memory::Binary(tileBank.m_addr);
+			m_tileFormat = tileBank.m_format;
+			
+			m_tileWidth = m_tileFormat & TF_BITS_FOR_WIDTH;
 			if (tileWidth)
-				// override tile width with custom value
-				m_tileWidth = tileWidth;
+			// override tile width with custom value
+			m_tileWidth = tileWidth;
 			else if (!m_tileWidth)
-				// if tile width is still not set, use default value 
-				m_tileWidth = 8;
+			// if tile width is still not set, use default value
+			m_tileWidth = 8;
 		}
 
-		void setFontBank(const FontBank &fontBank)
+		void setTileBank(const TileBank_s& tileBank, Size tileWidth)
 		{
-			setTileBank(fontBank);
-			m_asciiBase = fontBank.m_asciiBase;
+			const uint8_s * addr = tileBank.m_addr;
+			m_tileBank = memory::Binary(reinterpret_cast<const uint8_s *>(addr));
+			m_tileFormat = tileBank.m_format;
+			
+			m_tileWidth = m_tileFormat & TF_BITS_FOR_WIDTH;
+			if (tileWidth)
+			// override tile width with custom value
+			m_tileWidth = tileWidth;
+			else if (!m_tileWidth)
+			// if tile width is still not set, use default value
+			m_tileWidth = 8;
+		}
+
+		void setFontBank(const FontBank_f* fontBank)
+		{
+			m_tileBank = memory::Binary(fontBank->m_addr);
+			m_tileFormat = fontBank->m_format;
+			m_tileWidth = m_tileFormat & TF_BITS_FOR_WIDTH;			
+			m_asciiBase = fontBank->m_asciiBase;
+		}
+
+		void setFontBank(const FontBank_s* fontBank)
+		{
+			m_tileBank = memory::Binary(fontBank->m_addr);
+			m_tileFormat = fontBank->m_format;
+			m_tileWidth = m_tileFormat & TF_BITS_FOR_WIDTH;
+			m_asciiBase = fontBank->m_asciiBase;
 		}
 
 		void fillDisplay(u08 pattern)
@@ -285,9 +314,35 @@ namespace th
 			// TODO
 		}
 
-		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank& bitmap)
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank_f& bitmap)
 		{
 			Axis yh; 
+			TileIndex ti;
+			applyScroll(x, y);
+			if (isRenderable(y, h))
+			{
+				yh = y + h;
+				setTileBank(bitmap, w);
+				if (rf & RF_FLIP_Y)
+				{
+					for (ti = 0; y < yh; ++ti, yh -= 8)
+					{
+						renderTileFromBank(rf, x, yh - 8, ti);
+					}
+				}
+				else
+				{
+					for (ti = 0; y < yh; ++ti, y += 8)
+					{
+						renderTileFromBank(rf, x, y, ti);
+					}
+				}
+			}
+		}
+		
+		void renderBitmap(RenderFlags rf, Axis x, Axis y, Size w, Size h, const TileBank_s& bitmap)
+		{
+			Axis yh;
 			TileIndex ti;
 			applyScroll(x, y);
 			if (isRenderable(y, h))
